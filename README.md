@@ -4,7 +4,7 @@
 <p align="left">
 
 Welcome to the data replication repository for "Untapped Potential: Designed Digital Trace Data in Online Survey Experiments."
-We created this repository to share data and replication files described in our paper. If you use this repository, we ask that you please cite us. Suggested citation:
+We created this repository to share data and replication files for the results and figure described in our paper. If you use this repository, we ask that you please cite us. Suggested citation:
 
 > Erin Macke, Claire Daviss, and Emma Williams-Baron, "Untapped Potential: Designed Digital Trace Data in Online Survey Experiments," <em>Sociological Methods and Research</em>, forthcoming.
 
