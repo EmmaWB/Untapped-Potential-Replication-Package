@@ -1,4 +1,4 @@
-<h1 align="center">Online Survey Digital Trace Data</h1>
+<h1 align="center">Data and Code Replication Package</h1>
 <div id="top"></div>
 
 <p align="left">
@@ -9,6 +9,8 @@ We created this repository to share data and replication files described in our 
 > Erin Macke, Claire Daviss, and Emma Williams-Baron, "Untapped Potential: Designed Digital Trace Data in Online Survey Experiments," <em>Sociological Methods and Research</em>, forthcoming.
 
 SocArXiv Preprint: [10.31235/osf.io/frhj6](10.31235/osf.io/frhj6)<br>
+
+This repository contains the data and code to replicate Study 1 and Study 2 in the paper. Please find these saved in separate folders above.
 
 ### Abstract
 
