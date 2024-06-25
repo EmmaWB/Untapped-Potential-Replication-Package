@@ -1,0 +1,219 @@
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  H:\.shortcut-targets-by-id\1-HUB-LpZUD5DBPfVEOldrYqSrJfPCYXg\triplethreat\study3c - hybrid\SMR Study 1 Replication Package/do/log/02_clean_activity_data.log
+  log type:  text
+ opened on:  22 Jun 2024, 15:44:02
+
+. 
+. * Clearing environment
+. clear all
+
+. 
+. 
+. 
+. ********************************************************************************
+. * Load data                                                                    *
+. ********************************************************************************
+. 
+. * Import CSV storing activity data
+. import delimited code time activity candidate ///
+>         using "$data/rawdata/activity_data.csv", clear
+(4 vars, 32,042 obs)
+
+.         
+. * Removing any odd characters from code (code is equivalent to unique user ID)
+. ssc install charlist
+checking charlist consistency and verifying not already installed...
+all files already exist and are up to date.
+
+. charlist code
+"0123456789abcdefghijklmnoprstuvwyz¯»¿ÂÃ
+
+. return list
+
+macros:
+              r(chars) : ""0123456789abcdefghijklmnoprstuvwyz¯»¿ÂÃ"
+           r(sepchars) : "" 0 1 2 3 4 5 6 7 8 9 a b c d e f g h i j k l m n o p r s t u v w y z ¯ » ¿ Â Ã "
+              r(ascii) : "34 48 49 50 51 52 53 54 55 56 57 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 114 115 116 117 118 119 121 122 175 187 191 194 195 "
+
+. display r(ascii)
+34 48 49 50 51 52 53 54 55 56 57 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 114 115 116 117 118 119 121 122 175 187 191 194 195 
+
+. foreach i of numlist 123/195 {
+  2.         replace code = subinstr(code, "`=char(`i')'", "", .)
+  3. }
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(1 real change made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(1 real change made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(1 real change made)
+(0 real changes made)
+(0 real changes made)
+(1 real change made)
+(1 real change made)
+
+. replace code = subinstr(code, char(34), "", .) // removes quotation marks
+(1 real change made)
+
+. 
+. * Replacing resume candidate number with 2 or 3
+. * Note: this is necessary to merge with Qualtrics data. Candidate A = 2, Candidate B = 3. 
+. replace candidate = candidate + 1
+(32,042 real changes made)
+
+. 
+.         
+.         
+. ********************************************************************************
+. * Create timing variables                                                      *
+. ********************************************************************************
+. 
+. * Creating variables: time of first and last activities
+. gen double timestamp = clock(time, "MDY hms")
+
+. bysort code candidate: egen double mintime = min(timestamp)
+
+. bysort code candidate: egen double maxtime = max(timestamp)
+
+. format timestamp mintime maxtime %tc
+
+. 
+. * Creating variable: total time spent on resume in deciles
+. gen tottime = seconds(maxtime - mintime)
+
+. 
+. 
+.         
+. ********************************************************************************
+. * Applying variable labels                                                     *
+. ********************************************************************************
+. 
+. label var code                          "Website Code"
+
+. label var time                          "Activity Time"
+
+. label var activity                      "Activity Description"
+
+. label var candidate                     "Candidate/Resume Number"
+
+. label var timestamp                     "Activity Timestamp"
+
+. label var mintime                       "Earliest Activity Timestamp"
+
+. label var maxtime                       "Latest Activity Timestamp"
+
+. label var tottime                       "Total Time Spent on Resume in Seconds"
+
+. 
+. 
+. ********************************************************************************
+. * Paring down, reshaping, and saving data                                      *
+. ********************************************************************************
+. 
+. * Keeping only the variables needed for next stages
+. keep code candidate tottime
+
+. 
+. * Deleting duplicates
+. /* Note: there are duplicate observations because each row is an activity/digital 
+>         trace, but we need only one measure per survey participant: total time on the resume in deciles.
+> */
+. duplicates drop
+
+Duplicates in terms of all variables
+
+(28,818 observations deleted)
+
+. 
+. /* 
+> Here we reshape the dataset so that each observation is a survey participant, 
+> uniquely identified by "code," with variables corresponding to the two candidates they viewed.
+> */
+. reshape wide tottime, i(code) j(candidate)
+(note: j = 2 3)
+
+Data                               long   ->   wide
+-----------------------------------------------------------------------------
+Number of obs.                     3224   ->    1644
+Number of variables                   3   ->       3
+j variable (2 values)         candidate   ->   (dropped)
+xij variables:
+                                tottime   ->   tottime2 tottime3
+-----------------------------------------------------------------------------
+
+.         
+. * Save dataset for merging with other datasets in later do-files
+. save "$data/activity_data_wide.dta", replace
+file H:\.shortcut-targets-by-id\1-HUB-LpZUD5DBPfVEOldrYqSrJfPCYXg\triplethreat\study3c - hybrid\SMR Study 1 Replication Package/data/activity_data_wide.dta saved
+
+. 
+. log close
+      name:  <unnamed>
+       log:  H:\.shortcut-targets-by-id\1-HUB-LpZUD5DBPfVEOldrYqSrJfPCYXg\triplethreat\study3c - hybrid\SMR Study 1 Replication Package/do/log/02_clean_activity_data.log
+  log type:  text
+ closed on:  22 Jun 2024, 15:44:04
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

@@ -1,0 +1,204 @@
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  H:\.shortcut-targets-by-id\1-HUB-LpZUD5DBPfVEOldrYqSrJfPCYXg\triplethreat\study3c - hybrid\SMR Study 1 Replication Package/do/log/04_merge_data.log
+  log type:  text
+ opened on:  22 Jun 2024, 15:44:10
+
+. 
+. * Clearing environment
+. clear all
+
+. 
+. ********************************************************************************
+. * Merge Qualtrics, Prolific, and Resume data                                   *
+. ********************************************************************************
+. 
+. * Load survey data
+. use "$data/survey_data_wide.dta", clear
+
+. 
+. * Merging Prolific data from pretest study
+. merge 1:1 prolific_pid using "$data/prolific_pretest_pid.dta"
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                         1,853
+        from master                     1,796  (_merge==1)
+        from using                         57  (_merge==2)
+
+    matched                                88  (_merge==3)
+    -----------------------------------------
+
+. 
+. * Remove Prolific PIDs with no Qualtrics data (i.e., participated in pretest but not main survey)
+. drop if _merge==2
+(57 observations deleted)
+
+. duplicates tag code, gen(code_dup)
+
+Duplicates in terms of code
+
+. drop if code_dup > 0 & gc != 1 // droppping duplicates who did not complete survey
+(295 observations deleted)
+
+. drop code_dup
+
+. 
+. * Creating variable indicating pretest participation
+. gen pretest = _merge==3
+
+. label var pretest "Respondent Participated in Pretest"
+
+. label def pretestlbl 0 "Did not participate in pretest" ///
+>         1 "Participated in pretest"
+
+. label val pretest pretestlbl
+
+. drop _merge
+
+. 
+. * Merge main Prolifific data
+. merge 1:1 prolific_pid using "$data/prolific_data.dta" // note those who do not merge did not finish the survey 
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                           378
+        from master                         0  (_merge==1)
+        from using                        378  (_merge==2)
+
+    matched                             1,589  (_merge==3)
+    -----------------------------------------
+
+. drop _merge
+
+. duplicates tag code, gen(code_dup)
+
+Duplicates in terms of code
+
+. drop if code_dup > 0 & gc != 1 // droppping duplicates who did not complete survey
+(378 observations deleted)
+
+. drop code_dup
+
+. 
+. * Merge resume data
+. merge 1:1 code using "$data/resume_data_wide.dta"
+(note: variable code was str10, now str11 to accommodate using data's values)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                            68
+        from master                         6  (_merge==1)
+        from using                         62  (_merge==2)
+
+    matched                             1,583  (_merge==3)
+    -----------------------------------------
+
+. recode _merge (1 = 1 "Entered code incorrectly"), gen(badcode)
+(0 differences between _merge and badcode)
+
+. drop _merge
+
+. 
+. * Merge digital trace data
+. merge 1:1 code using "$data/activity_data_wide.dta"
+(note: variable code was str11, now str13 to accommodate using data's values)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             7
+        from master                         7  (_merge==1)
+        from using                          0  (_merge==2)
+
+    matched                             1,644  (_merge==3)
+    -----------------------------------------
+
+. drop _merge
+
+. 
+. 
+. 
+. ********************************************************************************
+. * Identify analytic sample                                                     *
+. ********************************************************************************
+. gen analytic_sample = 1
+
+. replace analytic_sample = 0 if gc != 1 // completed survey
+(75 real changes made)
+
+. replace analytic_sample = 0 if prolific_status != 1 // paid for survey (indicates completed everything successfully)
+(6 real changes made)
+
+. replace analytic_sample = 0 if pretest != 0 // not in pretest
+(70 real changes made)
+
+. replace analytic_sample = 0 if jobtype == . // assigned to job type treatment/control 
+(0 real changes made)
+
+. replace analytic_sample = 0 if woman == . // assigned to gender treatment/control
+(0 real changes made)
+
+. replace analytic_sample = 0 if badcode == 1 // entered linking code correctly
+(3 real changes made)
+
+. replace analytic_sample = 0 if code == "left12" | code == "lunch56" | code == "mountain58" | code == "olive85" | code == "tea38" // 5 respondents who weren't already dropped from analytic sample who didn't answer all survey questions
+(5 real changes made)
+
+. 
+. 
+. keep if analytic_sample == 1 // keep only the observations in the analytic sample
+(159 observations deleted)
+
+. keep id code prolific_pid jobtype woman man parent2 parent3 tottime2 tottime3 // keep only the variables used in analysis
+
+. 
+. * Save the final wide (respondent-level) dataset
+. save "$data/analysis_data_wide.dta", replace
+file H:\.shortcut-targets-by-id\1-HUB-LpZUD5DBPfVEOldrYqSrJfPCYXg\triplethreat\study3c - hybrid\SMR Study 1 Replication Package/data/analysis_data_wide.dta saved
+
+. 
+. 
+. 
+. ********************************************************************************
+. * Reshape the data for analysis                                                *
+. * This takes the data from wide, which is at the survey respondent level, to   *
+. *       long, which is at the job candidate level and which is used in analyses.   *
+. ********************************************************************************
+. 
+. * Load the wide data
+. use "$data/analysis_data_wide.dta", clear
+
+. 
+. * Reshape long
+. reshape long parent tottime, i(id) j(candidate)
+(note: j = 2 3)
+
+Data                               wide   ->   long
+-----------------------------------------------------------------------------
+Number of obs.                     1492   ->    2984
+Number of variables                  10   ->       9
+j variable (2 values)                     ->   candidate
+xij variables:
+                        parent2 parent3   ->   parent
+                      tottime2 tottime3   ->   tottime
+-----------------------------------------------------------------------------
+
+. 
+. * Generate tottime deciles variable
+. xtile tottime_deciles = tottime, nq(10) 
+
+. label var tottime_deciles       "Total Time Spent on Resume in Deciles"
+
+. 
+. 
+. * Save the long (candidate-level) dataset
+. save "$data/analysis_data_long.dta", replace
+file H:\.shortcut-targets-by-id\1-HUB-LpZUD5DBPfVEOldrYqSrJfPCYXg\triplethreat\study3c - hybrid\SMR Study 1 Replication Package/data/analysis_data_long.dta saved
+
+. 
+. log close
+      name:  <unnamed>
+       log:  H:\.shortcut-targets-by-id\1-HUB-LpZUD5DBPfVEOldrYqSrJfPCYXg\triplethreat\study3c - hybrid\SMR Study 1 Replication Package/do/log/04_merge_data.log
+  log type:  text
+ closed on:  22 Jun 2024, 15:44:10
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

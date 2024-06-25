@@ -1,0 +1,125 @@
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  H:\.shortcut-targets-by-id\1-HUB-LpZUD5DBPfVEOldrYqSrJfPCYXg\triplethreat\study3c - hybrid\SMR Study 1 Replication Package/do/log/05_analyze.log
+  log type:  text
+ opened on:  22 Jun 2024, 15:44:13
+
+. 
+. * Clearing environment
+. clear all
+
+. 
+. * Load data
+. use "$data/analysis_data_long.dta.", clear
+
+. 
+. ********************************************************************************
+. * Conduct analyses                                                             *
+. ********************************************************************************
+. 
+. * Use regression to determine statistical significance of difference between in-person and remote total time in deciles
+. reg tottime_deciles i.jobtype if woman == 1 // p < 0.01
+
+      Source |       SS           df       MS      Number of obs   =     1,480
+-------------+----------------------------------   F(2, 1477)      =      4.64
+       Model |  76.4772516         2  38.2386258   Prob > F        =    0.0098
+    Residual |  12168.8309     1,477  8.23888345   R-squared       =    0.0062
+-------------+----------------------------------   Adj R-squared   =    0.0049
+       Total |  12245.3081     1,479  8.27945105   Root MSE        =    2.8703
+
+------------------------------------------------------------------------------
+tottime_de~s |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+     jobtype |
+     hybrid  |   .3226201   .1788764     1.80   0.071    -.0282587    .6734988
+     remote  |   .5586444   .1849698     3.02   0.003      .195813    .9214757
+             |
+       _cons |   5.196911   .1261157    41.21   0.000     4.949526    5.444296
+------------------------------------------------------------------------------
+
+. reg tottime_deciles i.jobtype if woman == 0 // p < 0.1
+
+      Source |       SS           df       MS      Number of obs   =     1,502
+-------------+----------------------------------   F(2, 1499)      =      1.80
+       Model |  29.9247526         2  14.9623763   Prob > F        =    0.1656
+    Residual |  12455.9108     1,499  8.30948019   R-squared       =    0.0024
+-------------+----------------------------------   Adj R-squared   =    0.0011
+       Total |  12485.8356     1,501  8.31834481   Root MSE        =    2.8826
+
+------------------------------------------------------------------------------
+tottime_de~s |      Coef.   Std. Err.      t    P>|t|     [95% Conf. Interval]
+-------------+----------------------------------------------------------------
+     jobtype |
+     hybrid  |  -.0415975   .1858983    -0.22   0.823    -.4062459    .3230509
+     remote  |  -.3131974   .1814345    -1.73   0.085    -.6690898    .0426951
+             |
+       _cons |   5.592827    .132403    42.24   0.000     5.333112    5.852542
+------------------------------------------------------------------------------
+
+. 
+. * Collapse the data to generate the 95% confidence intervals
+. preserve
+
+. collapse (mean) meantime = tottime_deciles (sd) sdtime = tottime_deciles ///
+>         (count) n = tottime_deciles, by(jobtype man)
+
+. gen ul = meantime + invttail(n-1, 0.025)*(sdtime / sqrt(n)) // storing the upper limits of confidence intervals
+
+. gen ll = meantime - invttail(n-1, 0.025)*(sdtime / sqrt(n)) // storing the lower limits of confidence intervals
+
+. 
+. * Graph the data for women
+. graph twoway ///
+>         (bar meantime jobtype if man==0 & jobtype==1, color(gs4)) ///
+>         (bar meantime jobtype if man==0 & jobtype==2, color(gs8)) ///
+>         (bar meantime jobtype if man==0 & jobtype==3, color(gs12)) ///
+>         (rcap ul ll jobtype if man==0) ///
+>         (pci 6.2 1 6.2 3, lcolor(black)) ///
+>         (pci 6.15 1 6.2 1, lcolor(black)) ///
+>         (pci 6.15 3 6.2 3, lcolor(black)) ///
+>         (pci 6.2 2 6.25 2, lcolor(black)), ///
+>         ti("Women Candidates" " ") ///
+>         yti("") ylab(, nogrid) ///
+>         ylab(4.5(0.5)6) ysc(range(4.5 6.4)) ///
+>         xlab(1 "In-Person" 2 "Hybrid" 3 "Remote", tick)  ///
+>         text(6.3 2 "** p < .01") ///
+>         graphregion(color(white)) legend(off) /// 
+>         name(timing_wom, replace)
+
+. 
+. * Graph the data for men
+. graph twoway ///
+>         (bar meantime jobtype if man==1 & jobtype==1, color(gs4)) ///
+>         (bar meantime jobtype if man==1 & jobtype==2, color(gs8)) ///
+>         (bar meantime jobtype if man==1 & jobtype==3, color(gs12)) ///
+>         (rcap ul ll jobtype if man==1) ///
+>         (pci 6.2 1 6.2 3, lcolor(black)) ///
+>         (pci 6.15 1 6.2 1, lcolor(black)) ///
+>         (pci 6.15 3 6.2 3, lcolor(black)) ///
+>         (pci 6.2 2 6.25 2, lcolor(black)), ///
+>         ti("Men Candidates" " ") ///
+>         yti("") ylab(, nogrid) ///
+>         ylab(4.5(0.5)6) ysc(range(4.5 6.4)) ///
+>         xlab(1 "In-Person" 2 "Hybrid" 3 "Remote", tick)  ///
+>         text(6.3 2 "+ p < .1") ///
+>         graphregion(color(white)) legend(off) /// 
+>         name(timing_men, replace)
+
+. restore
+
+. 
+. 
+. * Combine women's and men's graphs into one: this is the final figure shown in the paper
+. graph combine timing_wom timing_men, graphregion(color(white))
+
+. graph export "$output/Figure2_PredictedTimeResumes_ByGenderJobType.png", as(png) replace
+(note: file H:\.shortcut-targets-by-id\1-HUB-LpZUD5DBPfVEOldrYqSrJfPCYXg\triplethreat\study3c - hybrid\SMR Study 1 Replication Package/output/Figure2_PredictedTimeResumes_ByGenderJobType.png not found)
+(file H:\.shortcut-targets-by-id\1-HUB-LpZUD5DBPfVEOldrYqSrJfPCYXg\triplethreat\study3c - hybrid\SMR Study 1 Replication Package/output/Figure2_PredictedTimeResumes_ByGenderJobType.png written in PNG format)
+
+. 
+. log close
+      name:  <unnamed>
+       log:  H:\.shortcut-targets-by-id\1-HUB-LpZUD5DBPfVEOldrYqSrJfPCYXg\triplethreat\study3c - hybrid\SMR Study 1 Replication Package/do/log/05_analyze.log
+  log type:  text
+ closed on:  22 Jun 2024, 15:44:16
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

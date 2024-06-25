@@ -1,0 +1,157 @@
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  H:\.shortcut-targets-by-id\1-HUB-LpZUD5DBPfVEOldrYqSrJfPCYXg\triplethreat\study3c - hybrid\SMR Study 1 Replication Package/do/log/03_clean_survey_data.log
+  log type:  text
+ opened on:  22 Jun 2024, 15:44:06
+
+. 
+. * Clearing environment
+. clear all
+
+. 
+. 
+. ********************************************************************************
+. * Import and clean Prolific survey data                                        *
+. ********************************************************************************
+. 
+. * Prolific pretest data will be used to exclude participants later                     
+. import delimited prolific_pid using ///
+>         "$data/rawdata/prolific_pretest_data.csv", clear        
+(1 var, 145 obs)
+
+. save "$data/prolific_pretest_pid.dta", replace
+file H:\.shortcut-targets-by-id\1-HUB-LpZUD5DBPfVEOldrYqSrJfPCYXg\triplethreat\study3c - hybrid\SMR Study 1 Replication Package/data/prolific_pretest_pid.dta saved
+
+.         
+. *** Part 1 of main Prolific data collection
+. import delimited prolific_pid temp_prolific_status using ///
+>         "$data/rawdata/prolific_data_part1.csv", clear  
+(2 vars, 1,475 obs)
+
+. encode temp_prolific_status, gen(prolific_status)
+
+. drop temp*
+
+. sort prolific_pid
+
+. save "$data/prolific_part1.dta", replace
+file H:\.shortcut-targets-by-id\1-HUB-LpZUD5DBPfVEOldrYqSrJfPCYXg\triplethreat\study3c - hybrid\SMR Study 1 Replication Package/data/prolific_part1.dta saved
+
+. 
+. *** Part 2 of main Prolific data collection
+. import delimited prolific_pid temp_prolific_status using ///
+>         "$data/rawdata/prolific_data_part2.csv", clear          
+(2 vars, 492 obs)
+
+. encode temp_prolific_status, gen(prolific_status)
+
+. drop temp*
+
+. sort prolific_pid
+
+. save "$data/prolific_part2.dta", replace
+file H:\.shortcut-targets-by-id\1-HUB-LpZUD5DBPfVEOldrYqSrJfPCYXg\triplethreat\study3c - hybrid\SMR Study 1 Replication Package/data/prolific_part2.dta saved
+
+. 
+. *** Append the two parts of the main Prolific data collection
+. append using "$data/prolific_part1.dta"
+(label prolific_status already defined)
+
+. save "$data/prolific_data.dta", replace
+file H:\.shortcut-targets-by-id\1-HUB-LpZUD5DBPfVEOldrYqSrJfPCYXg\triplethreat\study3c - hybrid\SMR Study 1 Replication Package/data/prolific_data.dta saved
+
+.         
+. ********************************************************************************
+. * Import and clean Qualtrics survey data                                       *
+. ********************************************************************************
+. 
+. * Import Qualtrics data from excel sheet
+. import excel "$data/rawdata/qualtrics_data.xlsx", firstrow clear
+
+.         
+. * Unique respondent id
+. gen id = _n
+
+. label var id "Respondent Id"
+
+. order id // move to front of dataset
+
+.         
+. * Respondent completed survey
+. label var gc "Respondent Completed Survey"
+
+. label def gc_lbl 1 "Completed Survey"
+
+. label val gc gc_lbl
+
+. 
+. * Encoding job-type labels
+. label def jobtypelbl 1 "inperson" 2 "hybrid" 3 "remote"
+
+. encode temp_jobtype, gen(jobtype) label(jobtypelbl)
+
+. label var jobtype "Job Type"
+
+. 
+. * Cleaning gender condition variable
+. recode temp_condition (0 = 1 "Woman")(1 = 0 "Man"), gen(woman) // raw Qualtrics data has 1 = men so we are reverse coding here for women = 1
+(1606 differences between temp_condition and woman)
+
+. recode temp_condition (0 = 0 "Woman")(1 = 1 "Man"), gen(man)
+(0 differences between temp_condition and man)
+
+. label var woman "Candidate Gender Condition"
+
+. 
+. * Unique website code for each respondent
+. gen str temp_code=""
+(1,930 missing values generated)
+
+. replace temp_code = temp_code_woman if woman == 1
+variable temp_code was str1 now str10
+(796 real changes made)
+
+. replace temp_code = temp_code_man if woman == 0
+(793 real changes made)
+
+.         
+. * Removing capitalization & spaces in code
+. gen code = lower(temp_code)
+(341 missing values generated)
+
+. replace code = subinstr(code, " ", "", .)
+(4 real changes made)
+
+. label var code "Real Code Entry"
+
+.         /* Note: This is the code the respondent enters while they are looking at
+>         Candidate A's resume. It is a unique code, produced via the DTP Resume
+>         website, and contains a common word and a number between 1 and 99. 
+>         It's important for this variable to be named "code", as it will be used
+>         to merge with the resume and activity data. */
+. 
+. drop temp*
+
+. 
+. * Cleaning duplicates on prolific_pid
+. duplicates tag prolific_pid, gen(dup)
+
+Duplicates in terms of prolific_pid
+
+. drop if dup != 0 & gc != 1 // dropping duplicates who entered the survey multiple times but only completed it once
+(46 observations deleted)
+
+. drop dup
+
+. 
+. * Saving the wide data: Each observation is a survey respondent. Respondent-level variables are ordered first.
+. save "$data/survey_data_wide.dta", replace
+file H:\.shortcut-targets-by-id\1-HUB-LpZUD5DBPfVEOldrYqSrJfPCYXg\triplethreat\study3c - hybrid\SMR Study 1 Replication Package/data/survey_data_wide.dta saved
+
+. 
+. log close
+      name:  <unnamed>
+       log:  H:\.shortcut-targets-by-id\1-HUB-LpZUD5DBPfVEOldrYqSrJfPCYXg\triplethreat\study3c - hybrid\SMR Study 1 Replication Package/do/log/03_clean_survey_data.log
+  log type:  text
+ closed on:  22 Jun 2024, 15:44:07
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
