@@ -1,0 +1,289 @@
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Users/clairedaviss/Library/CloudStorage/GoogleDrive-cedaviss@gmail.com/.shortcut-targets-by-id/1rPhM1nXscu6uP-oHimucPUcyQ05iBPNL/study1/SMR Study 2 Replica
+> tion Package/do/log/01_clean_resume_data_2024-06-15.log
+  log type:  text
+ opened on:  15 Jun 2024, 17:44:16
+
+. 
+. * Load resume data -------------------------------------------------------------
+. 
+. * Import CSV of resume data
+. import delimited userid edu gender parent remote work1 work2 name resume ///
+>         using "$data/rawdata/study2_resume_raw_2021_04_24.csv", clear
+(9 vars, 1,680 obs)
+
+.         
+. * Removing any odd characters from userid
+. charlist userid
+"0123456789abcdefghijklmnoprstuvwyz¯»¿ÂÃ
+
+. return list
+
+macros:
+              r(chars) : ""0123456789abcdefghijklmnoprstuvwyz¯»¿ÂÃ"
+           r(sepchars) : "" 0 1 2 3 4 5 6 7 8 9 a b c d e f g h i j k l m n o p r s t u v w y z ¯ » ¿ Â Ã "
+              r(ascii) : "34 48 49 50 51 52 53 54 55 56 57 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 114 115 116 117 118 119 121 122 175 187 191 1.."
+
+. display r(ascii)
+34 48 49 50 51 52 53 54 55 56 57 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 114 115 116 117 118 119 121 122 175 187 191 194 195 
+
+. foreach i of numlist 123/195 { // nonstandard characters
+  2. replace userid = subinstr(userid, "`=char(`i')'", "", .)
+  3. }
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(1 real change made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(1 real change made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(1 real change made)
+(0 real changes made)
+(0 real changes made)
+(1 real change made)
+(1 real change made)
+
+. replace userid = subinstr(userid, char(34), "", .) // removes quotation marks
+(1 real change made)
+
+. 
+. * Renaming userid       
+. rename userid code
+
+.         /* Note:  It's important to rename the "userid" variable to "code" so that it
+>         can merge with the Qualtrics survey data. */
+. 
+. * Sorting data
+. sort code resume
+
+.                 
+.         
+. * Adding codes -----------------------------------------------------------------
+. 
+. * Education
+. encode edu, gen(edunew)
+
+. drop edu
+
+. recode edunew           (1 = 0 "Ohio State University") ///
+>                                         (2 = 1 "University of Pittsburgh"), gen(edu)
+(1680 differences between edunew and edu)
+
+. drop edunew
+
+. label var edu "Resume Education"
+
+. 
+. * Gender
+. encode gender, gen(gendernew)
+
+. drop gender
+
+. recode gendernew        (1 = 0 "Man") /// 
+>                                         (2 = 1 "Woman"), gen(gender)
+(1680 differences between gendernew and gender)
+
+. drop gendernew
+
+. label var gender "Resume Gender"
+
+. 
+. * Parent
+. encode parent, gen(parentnew)
+
+. drop parent
+
+. recode parentnew        (1 = 0 "Non-parent") ///
+>                                         (2 = 1 "Parent"), gen(parent)
+(1680 differences between parentnew and parent)
+
+. drop parentnew
+
+. label var parent "Resume Parent"
+
+. 
+. * Remote 
+. drop remote // n/a for this study
+
+. 
+. * Work1
+. encode work1, gen(work1new)
+
+. recode work1new         (1 = 0 "Communications Associate") ///
+>                                         (2 = 1 "Public Relations Associate"), gen(workfirst)
+(1680 differences between work1new and workfirst)
+
+. drop work1 work1new
+
+. label var workfirst "Resume First Work Box"
+
+. 
+. * Work2
+. encode work2, gen(work2new)
+
+. recode work2new         (1 = 0 "Public Relations Coordinator") ///
+>                                         (2 = 1 "Communications Assistant"), gen(worksecnd)
+(1680 differences between work2new and worksecnd)
+
+. drop work2 work2new
+
+. label var worksecnd "Resume Second Work Box"
+
+. 
+. * Name
+. label def name_lbl 1 "Seth T." 2 "Bradley S." 3 "Molly S." 4 "Emily T."
+
+. gen namenew=.
+(1,680 missing values generated)
+
+. replace namenew=1 if name=="a" & gender==0
+(436 real changes made)
+
+. replace namenew=2 if name=="b" & gender==0
+(414 real changes made)
+
+. replace namenew=3 if name=="a" & gender==1
+(412 real changes made)
+
+. replace namenew=4 if name=="b" & gender==1
+(417 real changes made)
+
+. tab name namenew
+
+           |                   namenew
+      name |         1          2          3          4 |     Total
+-----------+--------------------------------------------+----------
+         a |       436          0        412          0 |       848 
+         b |         0        414          0        417 |       831 
+-----------+--------------------------------------------+----------
+     Total |       436        414        412        417 |     1,679 
+
+. drop name
+
+. rename namenew name
+
+. label val name name_lbl
+
+. label var name "Candidate Name"
+
+. 
+. * Replacing resume variable with candidate variable
+.         /* Note: To match the candidate numbering in the Qualtrics file, resume 1
+>         (for Candidate A) will be candidate 2, resume 2 (for Candidate B) will be 
+>         candidate 3. */
+. gen candidate = resume + 1, after(code)
+
+. label var candidate "Candidate Number"
+
+. drop resume
+
+. 
+. * Saving data ------------------------------------------------------------------
+. 
+. * Long data
+. save "$data/study2_resume_long.dta", replace
+file /Users/clairedaviss/Library/CloudStorage/GoogleDrive-cedaviss@gmail.com/.shortcut-targets-by-id/1rPhM1nXscu6uP-oHimucPUcyQ05iBPNL/study1/SMR Study 2 Replication Pac
+> kage/data/study2_resume_long.dta saved
+
+. export delimited using "$data/study2_resume_long.csv", replace
+file /Users/clairedaviss/Library/CloudStorage/GoogleDrive-cedaviss@gmail.com/.shortcut-targets-by-id/1rPhM1nXscu6uP-oHimucPUcyQ05iBPNL/study1/SMR Study 2 Replication Pac
+> kage/data/study2_resume_long.csv saved
+
+. 
+. * Wide data
+. /* Here we reshape the dataset so that each observation is a participant 
+> (indicated by "code", with variables corresponding to the two candidates they
+> viewed. */
+. reshape wide edu gender parent workfirst worksecnd name, ///
+>         i(code) j(candidate)
+(note: j = 2 3)
+
+Data                               long   ->   wide
+-----------------------------------------------------------------------------
+Number of obs.                     1680   ->    1036
+Number of variables                   8   ->      13
+j variable (2 values)         candidate   ->   (dropped)
+xij variables:
+                                    edu   ->   edu2 edu3
+                                 gender   ->   gender2 gender3
+                                 parent   ->   parent2 parent3
+                              workfirst   ->   workfirst2 workfirst3
+                              worksecnd   ->   worksecnd2 worksecnd3
+                                   name   ->   name2 name3
+-----------------------------------------------------------------------------
+
+. save "$data/study2_resume_wide.dta", replace
+file /Users/clairedaviss/Library/CloudStorage/GoogleDrive-cedaviss@gmail.com/.shortcut-targets-by-id/1rPhM1nXscu6uP-oHimucPUcyQ05iBPNL/study1/SMR Study 2 Replication Pac
+> kage/data/study2_resume_wide.dta saved
+
+. 
+. * Close log file ---------------------------------------------------------------
+. log close
+      name:  <unnamed>
+       log:  /Users/clairedaviss/Library/CloudStorage/GoogleDrive-cedaviss@gmail.com/.shortcut-targets-by-id/1rPhM1nXscu6uP-oHimucPUcyQ05iBPNL/study1/SMR Study 2 Replica
+> tion Package/do/log/01_clean_resume_data_2024-06-15.log
+  log type:  text
+ closed on:  15 Jun 2024, 17:44:16
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
