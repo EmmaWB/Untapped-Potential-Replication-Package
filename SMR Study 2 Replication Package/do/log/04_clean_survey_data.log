@@ -1,0 +1,102 @@
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  H:\.shortcut-targets-by-id\1-HUB-LpZUD5DBPfVEOldrYqSrJfPCYXg\triplethreat\study1\SMR Study 2 Replication Package/do/log/04_clean_survey_data.log
+  log type:  text
+ opened on:  25 Jun 2024, 09:00:29
+
+. 
+. * Clearing environment
+. clear all
+
+. 
+. 
+. 
+. ********************************************************************************
+. * Load data and create respondent-level dataset                                 *
+. ********************************************************************************
+. 
+. * Import Qualtrics data from excel sheet
+. import excel "$data/rawdata/survey_data.xlsx", firstrow clear
+
+. 
+. * Respondent is a "good complete" (completed survey)
+. destring gc, replace
+gc already numeric; no replace
+
+. label var gc "Respondent Completed Survey"
+
+. label def gc_lbl 1 "Completed Survey"
+
+. label val gc gc_lbl
+
+. 
+. * Encoding accountability labels
+. rename sd accountable   
+
+. label var accountable "Accountability Condition"
+
+. label define accountable_l 0 "Control" 1 "Accountability treatment"
+
+. label val accountable accountable_l
+
+.                 
+. * Relabeling gender condition variable
+. rename condition man
+
+. label var man "Candidate Gender Condition"
+
+. label def man_lbl 0 "Woman Candidates" 1 "Man Candidates"
+
+. label val man man_lbl
+
+. order man, after(accountable)
+
+. 
+. * Unique website code for each respondent
+. gen str temp_code=""
+(1,438 missing values generated)
+
+. replace temp_code = code_woman if man == 0
+variable temp_code was str1 now str10
+(305 real changes made)
+
+. replace temp_code = code_man if man == 1
+variable temp_code was str10 now str11
+(313 real changes made)
+
+.         
+. * Removing capitalization & spaces in code
+. gen code = lower(temp_code)
+(820 missing values generated)
+
+. replace code = subinstr(code, " ", "", .)
+(7 real changes made)
+
+. label var code "Real Code Entry"
+
+.         /* Note: This is the code the respondent enters while they are looking at
+>         Candidate A's resume. It is a unique code, produced via the DTP Resume
+>         website, and contains a common word and a number between 1 and 99. 
+>         It's important for this variable to be named "code", as it will be used
+>         to merge with the resume and activity data. */
+. 
+. * Keep only necessary variables
+. keep code gc accountable        
+
+. 
+. * Keep only those who completed the survey and entered a linking code
+. keep if gc == 1 & code != ""
+(820 observations deleted)
+
+.         
+. * Saving respondent-level dataset
+. save "$data/survey_data_wide.dta", replace
+file H:\.shortcut-targets-by-id\1-HUB-LpZUD5DBPfVEOldrYqSrJfPCYXg\triplethreat\study1\SMR Study 2 Replication Package/data/survey_data_wide.dta saved
+
+. 
+. log close
+      name:  <unnamed>
+       log:  H:\.shortcut-targets-by-id\1-HUB-LpZUD5DBPfVEOldrYqSrJfPCYXg\triplethreat\study1\SMR Study 2 Replication Package/do/log/04_clean_survey_data.log
+  log type:  text
+ closed on:  25 Jun 2024, 09:00:29
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

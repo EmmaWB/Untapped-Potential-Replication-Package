@@ -1,0 +1,173 @@
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  H:\.shortcut-targets-by-id\1-HUB-LpZUD5DBPfVEOldrYqSrJfPCYXg\triplethreat\study1\SMR Study 2 Replication Package/do/log/05_merge_data.log
+  log type:  text
+ opened on:  25 Jun 2024, 09:00:32
+
+. 
+. 
+. 
+. ********************************************************************************
+. * Creating merged wide dataset                                                 *
+. ********************************************************************************
+. 
+. * Loading survey wide dataset
+. use "$data/survey_data_wide.dta", clear
+
+. 
+. *** Merging survey data with resume data 
+. merge 1:1 code using "$data/resume_data_wide.dta"
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                           426
+        from master                         4  (_merge==1)
+        from using                        422  (_merge==2)
+
+    matched                               614  (_merge==3)
+    -----------------------------------------
+
+. drop if _merge==2 
+(422 observations deleted)
+
+.         // DTP Resume codes not matched to survey data
+.         /* Note: These resume codes are ones that we generated while we were
+>         testing the survey. We thus are comfortable dropping them. */
+. tab _merge if gc==1 // Note: 614/618 respondents (99%) had matched codes.
+
+                 _merge |      Freq.     Percent        Cum.
+------------------------+-----------------------------------
+        master only (1) |          4        0.65        0.65
+            matched (3) |        614       99.35      100.00
+------------------------+-----------------------------------
+                  Total |        618      100.00
+
+. drop if _merge==1 
+(4 observations deleted)
+
+.         /* Codes that were not entered accurately by respondents, 
+>         meaning we cannot link them to their digital trace data, and cannot include them in analyses/ */
+. drop _merge
+
+. 
+. * Filling in some missing data
+.         /* Note: Some participants have missing resume data for Candidate B. This
+>         is likely because they did not actually enter the Candidate B page, so
+>         the DTP resume website did not record their data. We will fill in the 
+>         missing data, based on the values available for Candidate A. */
+. replace woman3 = woman2 if woman3==. // same gender
+(42 real changes made)
+
+. replace parent3 = 0 if parent2 == 1 // opposite parental status
+(23 real changes made)
+
+. replace parent3 = 1 if parent2 == 0 // opposite parental status
+(20 real changes made)
+
+. 
+. * Fixing variable labels
+. foreach i of numlist 2/3 {
+  2.         label var woman`i' "Candidate `i' Gender"
+  3.         label var parent`i' "Candidate `i' Parental Status"
+  4. }
+
+. 
+. * Saving wide file
+. save "$data/merged_data_wide.dta", replace      
+(note: file H:\.shortcut-targets-by-id\1-HUB-LpZUD5DBPfVEOldrYqSrJfPCYXg\triplethreat\study1\SMR Study 2 Replication Package/data/merged_data_wide.dta not found)
+file H:\.shortcut-targets-by-id\1-HUB-LpZUD5DBPfVEOldrYqSrJfPCYXg\triplethreat\study1\SMR Study 2 Replication Package/data/merged_data_wide.dta saved
+
+.         
+. *** Reshape long to get candidate-level observations in preparation for merging with mouse data
+. reshape long woman parent, i(code) j(candidate)
+(note: j = 2 3)
+
+Data                               wide   ->   long
+-----------------------------------------------------------------------------
+Number of obs.                      614   ->    1228
+Number of variables                   7   ->       6
+j variable (2 values)                     ->   candidate
+xij variables:
+                          woman2 woman3   ->   woman
+                        parent2 parent3   ->   parent
+-----------------------------------------------------------------------------
+
+. 
+. *** Sort by code and candidate
+. sort code candidate
+
+. 
+. *** Merge with mouse activity data
+. merge 1:m code candidate using "$data/mouse_data_wide.dta"
+(note: variable code was str11, now str13 to accommodate using data's values)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                           949
+        from master                        42  (_merge==1)
+        from using                        907  (_merge==2)
+
+    matched                             4,374  (_merge==3)
+    -----------------------------------------
+
+. drop if _merge == 2
+(907 observations deleted)
+
+.         /* _merge = 2 indicates mouse movement data for observations we are excluding from analyses
+>         including testing the site ourselves and respondents who did not properly enter the linking code. */
+. drop if _merge == 1
+(42 observations deleted)
+
+.         /* _merge = 1 indicates candidates with no mouse movement data, likely because
+>         the respondent did not open the second resume site (only 42 observations) */
+. 
+. *** Identify analytic sample
+. gen analytic_sample = 1
+
+. replace analytic_sample = 0 if gc != 1 // completed survey (every obs is a gc due to prior do-files, including here for transparency of criteria)
+(0 real changes made)
+
+. replace analytic_sample = 0 if accountable == . | woman == . // assigned to treatment/control for both experimental manipulations
+(0 real changes made)
+
+. replace analytic_sample = 0 if code == "" // good code; again including for transparency but every obs has a good code
+(0 real changes made)
+
+. replace analytic_sample = 0 if code == "chicken20" // technical error where respondent saw a woman and a man rather than just one gender
+(8 real changes made)
+
+. replace analytic_sample = 0 if code == "boat55" | ///
+>         code == "boat70" | ///
+>         code == "cake18" | ///
+>         code == "carrot95" | ///
+>         code == "chicken20" | ///
+>         code == "coffee29" | ///
+>         code == "eat73" | ///
+>         code == "fall64" | ///
+>         code == "lake62" | ///
+>         code == "park4" | ///
+>         code == "salad73" | ///
+>         code == "street83" | ///
+>         code == "swim81" | ///
+>         code == "thunder48"
+(75 real changes made)
+
+.         /* the codes dropped manually above are for a handful of respondents who did not answer
+>                 all survey questions who were not already excluded by prior criteria */
+. 
+. * Keep the analytic sample and save dataset for analysis in next do-file
+. keep if analytic_sample == 1
+(83 observations deleted)
+
+.         
+. save "$data/analytic_sample.dta", replace
+(note: file H:\.shortcut-targets-by-id\1-HUB-LpZUD5DBPfVEOldrYqSrJfPCYXg\triplethreat\study1\SMR Study 2 Replication Package/data/analytic_sample.dta not found)
+file H:\.shortcut-targets-by-id\1-HUB-LpZUD5DBPfVEOldrYqSrJfPCYXg\triplethreat\study1\SMR Study 2 Replication Package/data/analytic_sample.dta saved
+
+. 
+. log close
+      name:  <unnamed>
+       log:  H:\.shortcut-targets-by-id\1-HUB-LpZUD5DBPfVEOldrYqSrJfPCYXg\triplethreat\study1\SMR Study 2 Replication Package/do/log/05_merge_data.log
+  log type:  text
+ closed on:  25 Jun 2024, 09:00:32
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

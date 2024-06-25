@@ -1,0 +1,2251 @@
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Users/clairedaviss/Library/CloudStorage/GoogleDrive-cedaviss@gmail.com/.shortcut-targets-by-id/1rPhM1nXscu6uP-oHimucPUcyQ05iBPNL/study1/SMR Study 2 Replica
+> tion Package/do/log/04_analyze_mouse_data_2024-06-17.log
+  log type:  text
+ opened on:  17 Jun 2024, 21:59:39
+
+. 
+. 
+. * LOAD DATA ********************************************************************
+. 
+. * Load mouse data
+. use "$data/study2_mouse_wide.dta", clear
+
+. 
+. * Merge with resume data
+. gen candidate = resume
+
+. merge m:1 code candidate using "$data/study2_resume_long.dta", ///
+>         keep(master matched) gen(merge1)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                            13
+        from master                        13  (merge1==1)
+        from using                          0  (merge1==2)
+
+    matched                             5,268  (merge1==3)
+    -----------------------------------------
+
+. 
+. * Merge with analytic sample restrictions
+. merge m:1 code using "$data/nomiss1.dta", keep(matched) gen(merge2)
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                             0
+    matched                             4,291  (merge2==3)
+    -----------------------------------------
+
+. drop merge*
+
+. 
+. * Reorder variables
+. order id code candidate resume section gender parent edu-name
+
+. 
+. * ANALYSIS *********************************************************************
+. * Regressing parent on mousecount in each cell in each section
+. 
+. * Men, start section
+. * Creating matrix
+. * Rows: 240 cells; Columns: x cell, y cell, B, SE, p, N
+. matrix men_start = J(240, 6, .)
+
+. matrix colnames men_start = x y b se p n
+
+. local row = 0
+
+. foreach x of numlist 0/11 {
+  2.         foreach y of numlist 0/19 {
+  3.                 di "x = `x', y = `y'"
+  4.                 qui { 
+  5.                         reg x`x'y`y' i.parent if section == 1 & gender == 0
+  6.                         matrix reg_output = r(table)
+  7.                         
+.                         local row = `row' + 1
+  8.                         matrix men_start[`row',1] = `x'
+  9.                         matrix men_start[`row',2] = `y'
+ 10.                         matrix men_start[`row',3] = reg_output[1,2] // B
+ 11.                         matrix men_start[`row',4] = reg_output[2,2] // SE
+ 12.                         matrix men_start[`row',5] = reg_output[4,2] // p
+ 13.                         matrix men_start[`row',6] = e(N) // N
+ 14.                 }
+ 15.         }
+ 16. }
+x = 0, y = 0
+x = 0, y = 1
+x = 0, y = 2
+x = 0, y = 3
+x = 0, y = 4
+x = 0, y = 5
+x = 0, y = 6
+x = 0, y = 7
+x = 0, y = 8
+x = 0, y = 9
+x = 0, y = 10
+x = 0, y = 11
+x = 0, y = 12
+x = 0, y = 13
+x = 0, y = 14
+x = 0, y = 15
+x = 0, y = 16
+x = 0, y = 17
+x = 0, y = 18
+x = 0, y = 19
+x = 1, y = 0
+x = 1, y = 1
+x = 1, y = 2
+x = 1, y = 3
+x = 1, y = 4
+x = 1, y = 5
+x = 1, y = 6
+x = 1, y = 7
+x = 1, y = 8
+x = 1, y = 9
+x = 1, y = 10
+x = 1, y = 11
+x = 1, y = 12
+x = 1, y = 13
+x = 1, y = 14
+x = 1, y = 15
+x = 1, y = 16
+x = 1, y = 17
+x = 1, y = 18
+x = 1, y = 19
+x = 2, y = 0
+x = 2, y = 1
+x = 2, y = 2
+x = 2, y = 3
+x = 2, y = 4
+x = 2, y = 5
+x = 2, y = 6
+x = 2, y = 7
+x = 2, y = 8
+x = 2, y = 9
+x = 2, y = 10
+x = 2, y = 11
+x = 2, y = 12
+x = 2, y = 13
+x = 2, y = 14
+x = 2, y = 15
+x = 2, y = 16
+x = 2, y = 17
+x = 2, y = 18
+x = 2, y = 19
+x = 3, y = 0
+x = 3, y = 1
+x = 3, y = 2
+x = 3, y = 3
+x = 3, y = 4
+x = 3, y = 5
+x = 3, y = 6
+x = 3, y = 7
+x = 3, y = 8
+x = 3, y = 9
+x = 3, y = 10
+x = 3, y = 11
+x = 3, y = 12
+x = 3, y = 13
+x = 3, y = 14
+x = 3, y = 15
+x = 3, y = 16
+x = 3, y = 17
+x = 3, y = 18
+x = 3, y = 19
+x = 4, y = 0
+x = 4, y = 1
+x = 4, y = 2
+x = 4, y = 3
+x = 4, y = 4
+x = 4, y = 5
+x = 4, y = 6
+x = 4, y = 7
+x = 4, y = 8
+x = 4, y = 9
+x = 4, y = 10
+x = 4, y = 11
+x = 4, y = 12
+x = 4, y = 13
+x = 4, y = 14
+x = 4, y = 15
+x = 4, y = 16
+x = 4, y = 17
+x = 4, y = 18
+x = 4, y = 19
+x = 5, y = 0
+x = 5, y = 1
+x = 5, y = 2
+x = 5, y = 3
+x = 5, y = 4
+x = 5, y = 5
+x = 5, y = 6
+x = 5, y = 7
+x = 5, y = 8
+x = 5, y = 9
+x = 5, y = 10
+x = 5, y = 11
+x = 5, y = 12
+x = 5, y = 13
+x = 5, y = 14
+x = 5, y = 15
+x = 5, y = 16
+x = 5, y = 17
+x = 5, y = 18
+x = 5, y = 19
+x = 6, y = 0
+x = 6, y = 1
+x = 6, y = 2
+x = 6, y = 3
+x = 6, y = 4
+x = 6, y = 5
+x = 6, y = 6
+x = 6, y = 7
+x = 6, y = 8
+x = 6, y = 9
+x = 6, y = 10
+x = 6, y = 11
+x = 6, y = 12
+x = 6, y = 13
+x = 6, y = 14
+x = 6, y = 15
+x = 6, y = 16
+x = 6, y = 17
+x = 6, y = 18
+x = 6, y = 19
+x = 7, y = 0
+x = 7, y = 1
+x = 7, y = 2
+x = 7, y = 3
+x = 7, y = 4
+x = 7, y = 5
+x = 7, y = 6
+x = 7, y = 7
+x = 7, y = 8
+x = 7, y = 9
+x = 7, y = 10
+x = 7, y = 11
+x = 7, y = 12
+x = 7, y = 13
+x = 7, y = 14
+x = 7, y = 15
+x = 7, y = 16
+x = 7, y = 17
+x = 7, y = 18
+x = 7, y = 19
+x = 8, y = 0
+x = 8, y = 1
+x = 8, y = 2
+x = 8, y = 3
+x = 8, y = 4
+x = 8, y = 5
+x = 8, y = 6
+x = 8, y = 7
+x = 8, y = 8
+x = 8, y = 9
+x = 8, y = 10
+x = 8, y = 11
+x = 8, y = 12
+x = 8, y = 13
+x = 8, y = 14
+x = 8, y = 15
+x = 8, y = 16
+x = 8, y = 17
+x = 8, y = 18
+x = 8, y = 19
+x = 9, y = 0
+x = 9, y = 1
+x = 9, y = 2
+x = 9, y = 3
+x = 9, y = 4
+x = 9, y = 5
+x = 9, y = 6
+x = 9, y = 7
+x = 9, y = 8
+x = 9, y = 9
+x = 9, y = 10
+x = 9, y = 11
+x = 9, y = 12
+x = 9, y = 13
+x = 9, y = 14
+x = 9, y = 15
+x = 9, y = 16
+x = 9, y = 17
+x = 9, y = 18
+x = 9, y = 19
+x = 10, y = 0
+x = 10, y = 1
+x = 10, y = 2
+x = 10, y = 3
+x = 10, y = 4
+x = 10, y = 5
+x = 10, y = 6
+x = 10, y = 7
+x = 10, y = 8
+x = 10, y = 9
+x = 10, y = 10
+x = 10, y = 11
+x = 10, y = 12
+x = 10, y = 13
+x = 10, y = 14
+x = 10, y = 15
+x = 10, y = 16
+x = 10, y = 17
+x = 10, y = 18
+x = 10, y = 19
+x = 11, y = 0
+x = 11, y = 1
+x = 11, y = 2
+x = 11, y = 3
+x = 11, y = 4
+x = 11, y = 5
+x = 11, y = 6
+x = 11, y = 7
+x = 11, y = 8
+x = 11, y = 9
+x = 11, y = 10
+x = 11, y = 11
+x = 11, y = 12
+x = 11, y = 13
+x = 11, y = 14
+x = 11, y = 15
+x = 11, y = 16
+x = 11, y = 17
+x = 11, y = 18
+x = 11, y = 19
+
+. 
+. * Women, start section
+. * Creating matrix
+. * Rows: 240 cells; Columns: x cell, y cell, B, SE, p, N
+. matrix women_start = J(240, 6, .)
+
+. matrix colnames women_start = x y b se p n
+
+. local row = 0
+
+. foreach x of numlist 0/11 {
+  2.         foreach y of numlist 0/19 {
+  3.                 di "x = `x', y = `y'"
+  4.                 qui { 
+  5.                         reg x`x'y`y' i.parent if section == 1 & gender == 1
+  6.                         matrix reg_output = r(table)
+  7.                         
+.                         local row = `row' + 1
+  8.                         matrix women_start[`row',1] = `x'
+  9.                         matrix women_start[`row',2] = `y'
+ 10.                         matrix women_start[`row',3] = reg_output[1,2] // B
+ 11.                         matrix women_start[`row',4] = reg_output[2,2] // SE
+ 12.                         matrix women_start[`row',5] = reg_output[4,2] // p
+ 13.                         matrix women_start[`row',6] = e(N) // N
+ 14.                 }
+ 15.         }
+ 16. }
+x = 0, y = 0
+x = 0, y = 1
+x = 0, y = 2
+x = 0, y = 3
+x = 0, y = 4
+x = 0, y = 5
+x = 0, y = 6
+x = 0, y = 7
+x = 0, y = 8
+x = 0, y = 9
+x = 0, y = 10
+x = 0, y = 11
+x = 0, y = 12
+x = 0, y = 13
+x = 0, y = 14
+x = 0, y = 15
+x = 0, y = 16
+x = 0, y = 17
+x = 0, y = 18
+x = 0, y = 19
+x = 1, y = 0
+x = 1, y = 1
+x = 1, y = 2
+x = 1, y = 3
+x = 1, y = 4
+x = 1, y = 5
+x = 1, y = 6
+x = 1, y = 7
+x = 1, y = 8
+x = 1, y = 9
+x = 1, y = 10
+x = 1, y = 11
+x = 1, y = 12
+x = 1, y = 13
+x = 1, y = 14
+x = 1, y = 15
+x = 1, y = 16
+x = 1, y = 17
+x = 1, y = 18
+x = 1, y = 19
+x = 2, y = 0
+x = 2, y = 1
+x = 2, y = 2
+x = 2, y = 3
+x = 2, y = 4
+x = 2, y = 5
+x = 2, y = 6
+x = 2, y = 7
+x = 2, y = 8
+x = 2, y = 9
+x = 2, y = 10
+x = 2, y = 11
+x = 2, y = 12
+x = 2, y = 13
+x = 2, y = 14
+x = 2, y = 15
+x = 2, y = 16
+x = 2, y = 17
+x = 2, y = 18
+x = 2, y = 19
+x = 3, y = 0
+x = 3, y = 1
+x = 3, y = 2
+x = 3, y = 3
+x = 3, y = 4
+x = 3, y = 5
+x = 3, y = 6
+x = 3, y = 7
+x = 3, y = 8
+x = 3, y = 9
+x = 3, y = 10
+x = 3, y = 11
+x = 3, y = 12
+x = 3, y = 13
+x = 3, y = 14
+x = 3, y = 15
+x = 3, y = 16
+x = 3, y = 17
+x = 3, y = 18
+x = 3, y = 19
+x = 4, y = 0
+x = 4, y = 1
+x = 4, y = 2
+x = 4, y = 3
+x = 4, y = 4
+x = 4, y = 5
+x = 4, y = 6
+x = 4, y = 7
+x = 4, y = 8
+x = 4, y = 9
+x = 4, y = 10
+x = 4, y = 11
+x = 4, y = 12
+x = 4, y = 13
+x = 4, y = 14
+x = 4, y = 15
+x = 4, y = 16
+x = 4, y = 17
+x = 4, y = 18
+x = 4, y = 19
+x = 5, y = 0
+x = 5, y = 1
+x = 5, y = 2
+x = 5, y = 3
+x = 5, y = 4
+x = 5, y = 5
+x = 5, y = 6
+x = 5, y = 7
+x = 5, y = 8
+x = 5, y = 9
+x = 5, y = 10
+x = 5, y = 11
+x = 5, y = 12
+x = 5, y = 13
+x = 5, y = 14
+x = 5, y = 15
+x = 5, y = 16
+x = 5, y = 17
+x = 5, y = 18
+x = 5, y = 19
+x = 6, y = 0
+x = 6, y = 1
+x = 6, y = 2
+x = 6, y = 3
+x = 6, y = 4
+x = 6, y = 5
+x = 6, y = 6
+x = 6, y = 7
+x = 6, y = 8
+x = 6, y = 9
+x = 6, y = 10
+x = 6, y = 11
+x = 6, y = 12
+x = 6, y = 13
+x = 6, y = 14
+x = 6, y = 15
+x = 6, y = 16
+x = 6, y = 17
+x = 6, y = 18
+x = 6, y = 19
+x = 7, y = 0
+x = 7, y = 1
+x = 7, y = 2
+x = 7, y = 3
+x = 7, y = 4
+x = 7, y = 5
+x = 7, y = 6
+x = 7, y = 7
+x = 7, y = 8
+x = 7, y = 9
+x = 7, y = 10
+x = 7, y = 11
+x = 7, y = 12
+x = 7, y = 13
+x = 7, y = 14
+x = 7, y = 15
+x = 7, y = 16
+x = 7, y = 17
+x = 7, y = 18
+x = 7, y = 19
+x = 8, y = 0
+x = 8, y = 1
+x = 8, y = 2
+x = 8, y = 3
+x = 8, y = 4
+x = 8, y = 5
+x = 8, y = 6
+x = 8, y = 7
+x = 8, y = 8
+x = 8, y = 9
+x = 8, y = 10
+x = 8, y = 11
+x = 8, y = 12
+x = 8, y = 13
+x = 8, y = 14
+x = 8, y = 15
+x = 8, y = 16
+x = 8, y = 17
+x = 8, y = 18
+x = 8, y = 19
+x = 9, y = 0
+x = 9, y = 1
+x = 9, y = 2
+x = 9, y = 3
+x = 9, y = 4
+x = 9, y = 5
+x = 9, y = 6
+x = 9, y = 7
+x = 9, y = 8
+x = 9, y = 9
+x = 9, y = 10
+x = 9, y = 11
+x = 9, y = 12
+x = 9, y = 13
+x = 9, y = 14
+x = 9, y = 15
+x = 9, y = 16
+x = 9, y = 17
+x = 9, y = 18
+x = 9, y = 19
+x = 10, y = 0
+x = 10, y = 1
+x = 10, y = 2
+x = 10, y = 3
+x = 10, y = 4
+x = 10, y = 5
+x = 10, y = 6
+x = 10, y = 7
+x = 10, y = 8
+x = 10, y = 9
+x = 10, y = 10
+x = 10, y = 11
+x = 10, y = 12
+x = 10, y = 13
+x = 10, y = 14
+x = 10, y = 15
+x = 10, y = 16
+x = 10, y = 17
+x = 10, y = 18
+x = 10, y = 19
+x = 11, y = 0
+x = 11, y = 1
+x = 11, y = 2
+x = 11, y = 3
+x = 11, y = 4
+x = 11, y = 5
+x = 11, y = 6
+x = 11, y = 7
+x = 11, y = 8
+x = 11, y = 9
+x = 11, y = 10
+x = 11, y = 11
+x = 11, y = 12
+x = 11, y = 13
+x = 11, y = 14
+x = 11, y = 15
+x = 11, y = 16
+x = 11, y = 17
+x = 11, y = 18
+x = 11, y = 19
+
+. 
+. * Men, ed section
+. * Creating matrix
+. * Rows: 240 cells; Columns: x cell, y cell, B, SE, p, N
+. matrix men_ed = J(240, 6, .)
+
+. matrix colnames men_ed = x y b se p n
+
+. local row = 0
+
+. foreach x of numlist 0/11 {
+  2.         foreach y of numlist 0/19 {
+  3.                 di "x = `x', y = `y'"
+  4.                 qui { 
+  5.                         reg x`x'y`y' i.parent if section == 2 & gender == 0
+  6.                         matrix reg_output = r(table)
+  7.                         
+.                         local row = `row' + 1
+  8.                         matrix men_ed[`row',1] = `x'
+  9.                         matrix men_ed[`row',2] = `y'
+ 10.                         matrix men_ed[`row',3] = reg_output[1,2] // B
+ 11.                         matrix men_ed[`row',4] = reg_output[2,2] // SE
+ 12.                         matrix men_ed[`row',5] = reg_output[4,2] // p
+ 13.                         matrix men_ed[`row',6] = e(N) // N
+ 14.                 }
+ 15.         }
+ 16. }
+x = 0, y = 0
+x = 0, y = 1
+x = 0, y = 2
+x = 0, y = 3
+x = 0, y = 4
+x = 0, y = 5
+x = 0, y = 6
+x = 0, y = 7
+x = 0, y = 8
+x = 0, y = 9
+x = 0, y = 10
+x = 0, y = 11
+x = 0, y = 12
+x = 0, y = 13
+x = 0, y = 14
+x = 0, y = 15
+x = 0, y = 16
+x = 0, y = 17
+x = 0, y = 18
+x = 0, y = 19
+x = 1, y = 0
+x = 1, y = 1
+x = 1, y = 2
+x = 1, y = 3
+x = 1, y = 4
+x = 1, y = 5
+x = 1, y = 6
+x = 1, y = 7
+x = 1, y = 8
+x = 1, y = 9
+x = 1, y = 10
+x = 1, y = 11
+x = 1, y = 12
+x = 1, y = 13
+x = 1, y = 14
+x = 1, y = 15
+x = 1, y = 16
+x = 1, y = 17
+x = 1, y = 18
+x = 1, y = 19
+x = 2, y = 0
+x = 2, y = 1
+x = 2, y = 2
+x = 2, y = 3
+x = 2, y = 4
+x = 2, y = 5
+x = 2, y = 6
+x = 2, y = 7
+x = 2, y = 8
+x = 2, y = 9
+x = 2, y = 10
+x = 2, y = 11
+x = 2, y = 12
+x = 2, y = 13
+x = 2, y = 14
+x = 2, y = 15
+x = 2, y = 16
+x = 2, y = 17
+x = 2, y = 18
+x = 2, y = 19
+x = 3, y = 0
+x = 3, y = 1
+x = 3, y = 2
+x = 3, y = 3
+x = 3, y = 4
+x = 3, y = 5
+x = 3, y = 6
+x = 3, y = 7
+x = 3, y = 8
+x = 3, y = 9
+x = 3, y = 10
+x = 3, y = 11
+x = 3, y = 12
+x = 3, y = 13
+x = 3, y = 14
+x = 3, y = 15
+x = 3, y = 16
+x = 3, y = 17
+x = 3, y = 18
+x = 3, y = 19
+x = 4, y = 0
+x = 4, y = 1
+x = 4, y = 2
+x = 4, y = 3
+x = 4, y = 4
+x = 4, y = 5
+x = 4, y = 6
+x = 4, y = 7
+x = 4, y = 8
+x = 4, y = 9
+x = 4, y = 10
+x = 4, y = 11
+x = 4, y = 12
+x = 4, y = 13
+x = 4, y = 14
+x = 4, y = 15
+x = 4, y = 16
+x = 4, y = 17
+x = 4, y = 18
+x = 4, y = 19
+x = 5, y = 0
+x = 5, y = 1
+x = 5, y = 2
+x = 5, y = 3
+x = 5, y = 4
+x = 5, y = 5
+x = 5, y = 6
+x = 5, y = 7
+x = 5, y = 8
+x = 5, y = 9
+x = 5, y = 10
+x = 5, y = 11
+x = 5, y = 12
+x = 5, y = 13
+x = 5, y = 14
+x = 5, y = 15
+x = 5, y = 16
+x = 5, y = 17
+x = 5, y = 18
+x = 5, y = 19
+x = 6, y = 0
+x = 6, y = 1
+x = 6, y = 2
+x = 6, y = 3
+x = 6, y = 4
+x = 6, y = 5
+x = 6, y = 6
+x = 6, y = 7
+x = 6, y = 8
+x = 6, y = 9
+x = 6, y = 10
+x = 6, y = 11
+x = 6, y = 12
+x = 6, y = 13
+x = 6, y = 14
+x = 6, y = 15
+x = 6, y = 16
+x = 6, y = 17
+x = 6, y = 18
+x = 6, y = 19
+x = 7, y = 0
+x = 7, y = 1
+x = 7, y = 2
+x = 7, y = 3
+x = 7, y = 4
+x = 7, y = 5
+x = 7, y = 6
+x = 7, y = 7
+x = 7, y = 8
+x = 7, y = 9
+x = 7, y = 10
+x = 7, y = 11
+x = 7, y = 12
+x = 7, y = 13
+x = 7, y = 14
+x = 7, y = 15
+x = 7, y = 16
+x = 7, y = 17
+x = 7, y = 18
+x = 7, y = 19
+x = 8, y = 0
+x = 8, y = 1
+x = 8, y = 2
+x = 8, y = 3
+x = 8, y = 4
+x = 8, y = 5
+x = 8, y = 6
+x = 8, y = 7
+x = 8, y = 8
+x = 8, y = 9
+x = 8, y = 10
+x = 8, y = 11
+x = 8, y = 12
+x = 8, y = 13
+x = 8, y = 14
+x = 8, y = 15
+x = 8, y = 16
+x = 8, y = 17
+x = 8, y = 18
+x = 8, y = 19
+x = 9, y = 0
+x = 9, y = 1
+x = 9, y = 2
+x = 9, y = 3
+x = 9, y = 4
+x = 9, y = 5
+x = 9, y = 6
+x = 9, y = 7
+x = 9, y = 8
+x = 9, y = 9
+x = 9, y = 10
+x = 9, y = 11
+x = 9, y = 12
+x = 9, y = 13
+x = 9, y = 14
+x = 9, y = 15
+x = 9, y = 16
+x = 9, y = 17
+x = 9, y = 18
+x = 9, y = 19
+x = 10, y = 0
+x = 10, y = 1
+x = 10, y = 2
+x = 10, y = 3
+x = 10, y = 4
+x = 10, y = 5
+x = 10, y = 6
+x = 10, y = 7
+x = 10, y = 8
+x = 10, y = 9
+x = 10, y = 10
+x = 10, y = 11
+x = 10, y = 12
+x = 10, y = 13
+x = 10, y = 14
+x = 10, y = 15
+x = 10, y = 16
+x = 10, y = 17
+x = 10, y = 18
+x = 10, y = 19
+x = 11, y = 0
+x = 11, y = 1
+x = 11, y = 2
+x = 11, y = 3
+x = 11, y = 4
+x = 11, y = 5
+x = 11, y = 6
+x = 11, y = 7
+x = 11, y = 8
+x = 11, y = 9
+x = 11, y = 10
+x = 11, y = 11
+x = 11, y = 12
+x = 11, y = 13
+x = 11, y = 14
+x = 11, y = 15
+x = 11, y = 16
+x = 11, y = 17
+x = 11, y = 18
+x = 11, y = 19
+
+. 
+. * Women, ed section
+. * Creating matrix
+. * Rows: 240 cells; Columns: x cell, y cell, B, SE, p, N
+. matrix women_ed = J(240, 6, .)
+
+. matrix colnames women_ed = x y b se p n
+
+. local row = 0
+
+. foreach x of numlist 0/11 {
+  2.         foreach y of numlist 0/19 {
+  3.                 di "x = `x', y = `y'"
+  4.                 qui { 
+  5.                         reg x`x'y`y' i.parent if section == 2 & gender == 1
+  6.                         matrix reg_output = r(table)
+  7.                         
+.                         local row = `row' + 1
+  8.                         matrix women_ed[`row',1] = `x'
+  9.                         matrix women_ed[`row',2] = `y'
+ 10.                         matrix women_ed[`row',3] = reg_output[1,2] // B
+ 11.                         matrix women_ed[`row',4] = reg_output[2,2] // SE
+ 12.                         matrix women_ed[`row',5] = reg_output[4,2] // p
+ 13.                         matrix women_ed[`row',6] = e(N) // N
+ 14.                 }
+ 15.         }
+ 16. }
+x = 0, y = 0
+x = 0, y = 1
+x = 0, y = 2
+x = 0, y = 3
+x = 0, y = 4
+x = 0, y = 5
+x = 0, y = 6
+x = 0, y = 7
+x = 0, y = 8
+x = 0, y = 9
+x = 0, y = 10
+x = 0, y = 11
+x = 0, y = 12
+x = 0, y = 13
+x = 0, y = 14
+x = 0, y = 15
+x = 0, y = 16
+x = 0, y = 17
+x = 0, y = 18
+x = 0, y = 19
+x = 1, y = 0
+x = 1, y = 1
+x = 1, y = 2
+x = 1, y = 3
+x = 1, y = 4
+x = 1, y = 5
+x = 1, y = 6
+x = 1, y = 7
+x = 1, y = 8
+x = 1, y = 9
+x = 1, y = 10
+x = 1, y = 11
+x = 1, y = 12
+x = 1, y = 13
+x = 1, y = 14
+x = 1, y = 15
+x = 1, y = 16
+x = 1, y = 17
+x = 1, y = 18
+x = 1, y = 19
+x = 2, y = 0
+x = 2, y = 1
+x = 2, y = 2
+x = 2, y = 3
+x = 2, y = 4
+x = 2, y = 5
+x = 2, y = 6
+x = 2, y = 7
+x = 2, y = 8
+x = 2, y = 9
+x = 2, y = 10
+x = 2, y = 11
+x = 2, y = 12
+x = 2, y = 13
+x = 2, y = 14
+x = 2, y = 15
+x = 2, y = 16
+x = 2, y = 17
+x = 2, y = 18
+x = 2, y = 19
+x = 3, y = 0
+x = 3, y = 1
+x = 3, y = 2
+x = 3, y = 3
+x = 3, y = 4
+x = 3, y = 5
+x = 3, y = 6
+x = 3, y = 7
+x = 3, y = 8
+x = 3, y = 9
+x = 3, y = 10
+x = 3, y = 11
+x = 3, y = 12
+x = 3, y = 13
+x = 3, y = 14
+x = 3, y = 15
+x = 3, y = 16
+x = 3, y = 17
+x = 3, y = 18
+x = 3, y = 19
+x = 4, y = 0
+x = 4, y = 1
+x = 4, y = 2
+x = 4, y = 3
+x = 4, y = 4
+x = 4, y = 5
+x = 4, y = 6
+x = 4, y = 7
+x = 4, y = 8
+x = 4, y = 9
+x = 4, y = 10
+x = 4, y = 11
+x = 4, y = 12
+x = 4, y = 13
+x = 4, y = 14
+x = 4, y = 15
+x = 4, y = 16
+x = 4, y = 17
+x = 4, y = 18
+x = 4, y = 19
+x = 5, y = 0
+x = 5, y = 1
+x = 5, y = 2
+x = 5, y = 3
+x = 5, y = 4
+x = 5, y = 5
+x = 5, y = 6
+x = 5, y = 7
+x = 5, y = 8
+x = 5, y = 9
+x = 5, y = 10
+x = 5, y = 11
+x = 5, y = 12
+x = 5, y = 13
+x = 5, y = 14
+x = 5, y = 15
+x = 5, y = 16
+x = 5, y = 17
+x = 5, y = 18
+x = 5, y = 19
+x = 6, y = 0
+x = 6, y = 1
+x = 6, y = 2
+x = 6, y = 3
+x = 6, y = 4
+x = 6, y = 5
+x = 6, y = 6
+x = 6, y = 7
+x = 6, y = 8
+x = 6, y = 9
+x = 6, y = 10
+x = 6, y = 11
+x = 6, y = 12
+x = 6, y = 13
+x = 6, y = 14
+x = 6, y = 15
+x = 6, y = 16
+x = 6, y = 17
+x = 6, y = 18
+x = 6, y = 19
+x = 7, y = 0
+x = 7, y = 1
+x = 7, y = 2
+x = 7, y = 3
+x = 7, y = 4
+x = 7, y = 5
+x = 7, y = 6
+x = 7, y = 7
+x = 7, y = 8
+x = 7, y = 9
+x = 7, y = 10
+x = 7, y = 11
+x = 7, y = 12
+x = 7, y = 13
+x = 7, y = 14
+x = 7, y = 15
+x = 7, y = 16
+x = 7, y = 17
+x = 7, y = 18
+x = 7, y = 19
+x = 8, y = 0
+x = 8, y = 1
+x = 8, y = 2
+x = 8, y = 3
+x = 8, y = 4
+x = 8, y = 5
+x = 8, y = 6
+x = 8, y = 7
+x = 8, y = 8
+x = 8, y = 9
+x = 8, y = 10
+x = 8, y = 11
+x = 8, y = 12
+x = 8, y = 13
+x = 8, y = 14
+x = 8, y = 15
+x = 8, y = 16
+x = 8, y = 17
+x = 8, y = 18
+x = 8, y = 19
+x = 9, y = 0
+x = 9, y = 1
+x = 9, y = 2
+x = 9, y = 3
+x = 9, y = 4
+x = 9, y = 5
+x = 9, y = 6
+x = 9, y = 7
+x = 9, y = 8
+x = 9, y = 9
+x = 9, y = 10
+x = 9, y = 11
+x = 9, y = 12
+x = 9, y = 13
+x = 9, y = 14
+x = 9, y = 15
+x = 9, y = 16
+x = 9, y = 17
+x = 9, y = 18
+x = 9, y = 19
+x = 10, y = 0
+x = 10, y = 1
+x = 10, y = 2
+x = 10, y = 3
+x = 10, y = 4
+x = 10, y = 5
+x = 10, y = 6
+x = 10, y = 7
+x = 10, y = 8
+x = 10, y = 9
+x = 10, y = 10
+x = 10, y = 11
+x = 10, y = 12
+x = 10, y = 13
+x = 10, y = 14
+x = 10, y = 15
+x = 10, y = 16
+x = 10, y = 17
+x = 10, y = 18
+x = 10, y = 19
+x = 11, y = 0
+x = 11, y = 1
+x = 11, y = 2
+x = 11, y = 3
+x = 11, y = 4
+x = 11, y = 5
+x = 11, y = 6
+x = 11, y = 7
+x = 11, y = 8
+x = 11, y = 9
+x = 11, y = 10
+x = 11, y = 11
+x = 11, y = 12
+x = 11, y = 13
+x = 11, y = 14
+x = 11, y = 15
+x = 11, y = 16
+x = 11, y = 17
+x = 11, y = 18
+x = 11, y = 19
+
+. 
+. * Men, work section
+. * Creating matrix
+. * Rows: 240 cells; Columns: x cell, y cell, B, SE, p, N
+. matrix men_work = J(240, 6, .)
+
+. matrix colnames men_work = x y b se p n
+
+. local row = 0
+
+. foreach x of numlist 0/11 {
+  2.         foreach y of numlist 0/19 {
+  3.                 di "x = `x', y = `y'"
+  4.                 qui { 
+  5.                         reg x`x'y`y' i.parent if section == 3 & gender == 0
+  6.                         matrix reg_output = r(table)
+  7.                         
+.                         local row = `row' + 1
+  8.                         matrix men_work[`row',1] = `x'
+  9.                         matrix men_work[`row',2] = `y'
+ 10.                         matrix men_work[`row',3] = reg_output[1,2] // B
+ 11.                         matrix men_work[`row',4] = reg_output[2,2] // SE
+ 12.                         matrix men_work[`row',5] = reg_output[4,2] // p
+ 13.                         matrix men_work[`row',6] = e(N) // N
+ 14.                 }
+ 15.         }
+ 16. }
+x = 0, y = 0
+x = 0, y = 1
+x = 0, y = 2
+x = 0, y = 3
+x = 0, y = 4
+x = 0, y = 5
+x = 0, y = 6
+x = 0, y = 7
+x = 0, y = 8
+x = 0, y = 9
+x = 0, y = 10
+x = 0, y = 11
+x = 0, y = 12
+x = 0, y = 13
+x = 0, y = 14
+x = 0, y = 15
+x = 0, y = 16
+x = 0, y = 17
+x = 0, y = 18
+x = 0, y = 19
+x = 1, y = 0
+x = 1, y = 1
+x = 1, y = 2
+x = 1, y = 3
+x = 1, y = 4
+x = 1, y = 5
+x = 1, y = 6
+x = 1, y = 7
+x = 1, y = 8
+x = 1, y = 9
+x = 1, y = 10
+x = 1, y = 11
+x = 1, y = 12
+x = 1, y = 13
+x = 1, y = 14
+x = 1, y = 15
+x = 1, y = 16
+x = 1, y = 17
+x = 1, y = 18
+x = 1, y = 19
+x = 2, y = 0
+x = 2, y = 1
+x = 2, y = 2
+x = 2, y = 3
+x = 2, y = 4
+x = 2, y = 5
+x = 2, y = 6
+x = 2, y = 7
+x = 2, y = 8
+x = 2, y = 9
+x = 2, y = 10
+x = 2, y = 11
+x = 2, y = 12
+x = 2, y = 13
+x = 2, y = 14
+x = 2, y = 15
+x = 2, y = 16
+x = 2, y = 17
+x = 2, y = 18
+x = 2, y = 19
+x = 3, y = 0
+x = 3, y = 1
+x = 3, y = 2
+x = 3, y = 3
+x = 3, y = 4
+x = 3, y = 5
+x = 3, y = 6
+x = 3, y = 7
+x = 3, y = 8
+x = 3, y = 9
+x = 3, y = 10
+x = 3, y = 11
+x = 3, y = 12
+x = 3, y = 13
+x = 3, y = 14
+x = 3, y = 15
+x = 3, y = 16
+x = 3, y = 17
+x = 3, y = 18
+x = 3, y = 19
+x = 4, y = 0
+x = 4, y = 1
+x = 4, y = 2
+x = 4, y = 3
+x = 4, y = 4
+x = 4, y = 5
+x = 4, y = 6
+x = 4, y = 7
+x = 4, y = 8
+x = 4, y = 9
+x = 4, y = 10
+x = 4, y = 11
+x = 4, y = 12
+x = 4, y = 13
+x = 4, y = 14
+x = 4, y = 15
+x = 4, y = 16
+x = 4, y = 17
+x = 4, y = 18
+x = 4, y = 19
+x = 5, y = 0
+x = 5, y = 1
+x = 5, y = 2
+x = 5, y = 3
+x = 5, y = 4
+x = 5, y = 5
+x = 5, y = 6
+x = 5, y = 7
+x = 5, y = 8
+x = 5, y = 9
+x = 5, y = 10
+x = 5, y = 11
+x = 5, y = 12
+x = 5, y = 13
+x = 5, y = 14
+x = 5, y = 15
+x = 5, y = 16
+x = 5, y = 17
+x = 5, y = 18
+x = 5, y = 19
+x = 6, y = 0
+x = 6, y = 1
+x = 6, y = 2
+x = 6, y = 3
+x = 6, y = 4
+x = 6, y = 5
+x = 6, y = 6
+x = 6, y = 7
+x = 6, y = 8
+x = 6, y = 9
+x = 6, y = 10
+x = 6, y = 11
+x = 6, y = 12
+x = 6, y = 13
+x = 6, y = 14
+x = 6, y = 15
+x = 6, y = 16
+x = 6, y = 17
+x = 6, y = 18
+x = 6, y = 19
+x = 7, y = 0
+x = 7, y = 1
+x = 7, y = 2
+x = 7, y = 3
+x = 7, y = 4
+x = 7, y = 5
+x = 7, y = 6
+x = 7, y = 7
+x = 7, y = 8
+x = 7, y = 9
+x = 7, y = 10
+x = 7, y = 11
+x = 7, y = 12
+x = 7, y = 13
+x = 7, y = 14
+x = 7, y = 15
+x = 7, y = 16
+x = 7, y = 17
+x = 7, y = 18
+x = 7, y = 19
+x = 8, y = 0
+x = 8, y = 1
+x = 8, y = 2
+x = 8, y = 3
+x = 8, y = 4
+x = 8, y = 5
+x = 8, y = 6
+x = 8, y = 7
+x = 8, y = 8
+x = 8, y = 9
+x = 8, y = 10
+x = 8, y = 11
+x = 8, y = 12
+x = 8, y = 13
+x = 8, y = 14
+x = 8, y = 15
+x = 8, y = 16
+x = 8, y = 17
+x = 8, y = 18
+x = 8, y = 19
+x = 9, y = 0
+x = 9, y = 1
+x = 9, y = 2
+x = 9, y = 3
+x = 9, y = 4
+x = 9, y = 5
+x = 9, y = 6
+x = 9, y = 7
+x = 9, y = 8
+x = 9, y = 9
+x = 9, y = 10
+x = 9, y = 11
+x = 9, y = 12
+x = 9, y = 13
+x = 9, y = 14
+x = 9, y = 15
+x = 9, y = 16
+x = 9, y = 17
+x = 9, y = 18
+x = 9, y = 19
+x = 10, y = 0
+x = 10, y = 1
+x = 10, y = 2
+x = 10, y = 3
+x = 10, y = 4
+x = 10, y = 5
+x = 10, y = 6
+x = 10, y = 7
+x = 10, y = 8
+x = 10, y = 9
+x = 10, y = 10
+x = 10, y = 11
+x = 10, y = 12
+x = 10, y = 13
+x = 10, y = 14
+x = 10, y = 15
+x = 10, y = 16
+x = 10, y = 17
+x = 10, y = 18
+x = 10, y = 19
+x = 11, y = 0
+x = 11, y = 1
+x = 11, y = 2
+x = 11, y = 3
+x = 11, y = 4
+x = 11, y = 5
+x = 11, y = 6
+x = 11, y = 7
+x = 11, y = 8
+x = 11, y = 9
+x = 11, y = 10
+x = 11, y = 11
+x = 11, y = 12
+x = 11, y = 13
+x = 11, y = 14
+x = 11, y = 15
+x = 11, y = 16
+x = 11, y = 17
+x = 11, y = 18
+x = 11, y = 19
+
+. 
+. * Women, work section
+. * Creating matrix
+. * Rows: 240 cells; Columns: x cell, y cell, B, SE, p, N
+. matrix women_work = J(240, 6, .)
+
+. matrix colnames women_work = x y b se p n
+
+. local row = 0
+
+. foreach x of numlist 0/11 {
+  2.         foreach y of numlist 0/19 {
+  3.                 di "x = `x', y = `y'"
+  4.                 qui { 
+  5.                         reg x`x'y`y' i.parent if section == 3 & gender == 1
+  6.                         matrix reg_output = r(table)
+  7.                         
+.                         local row = `row' + 1
+  8.                         matrix women_work[`row',1] = `x'
+  9.                         matrix women_work[`row',2] = `y'
+ 10.                         matrix women_work[`row',3] = reg_output[1,2] // B
+ 11.                         matrix women_work[`row',4] = reg_output[2,2] // SE
+ 12.                         matrix women_work[`row',5] = reg_output[4,2] // p
+ 13.                         matrix women_work[`row',6] = e(N) // N
+ 14.                 }
+ 15.         }
+ 16. }
+x = 0, y = 0
+x = 0, y = 1
+x = 0, y = 2
+x = 0, y = 3
+x = 0, y = 4
+x = 0, y = 5
+x = 0, y = 6
+x = 0, y = 7
+x = 0, y = 8
+x = 0, y = 9
+x = 0, y = 10
+x = 0, y = 11
+x = 0, y = 12
+x = 0, y = 13
+x = 0, y = 14
+x = 0, y = 15
+x = 0, y = 16
+x = 0, y = 17
+x = 0, y = 18
+x = 0, y = 19
+x = 1, y = 0
+x = 1, y = 1
+x = 1, y = 2
+x = 1, y = 3
+x = 1, y = 4
+x = 1, y = 5
+x = 1, y = 6
+x = 1, y = 7
+x = 1, y = 8
+x = 1, y = 9
+x = 1, y = 10
+x = 1, y = 11
+x = 1, y = 12
+x = 1, y = 13
+x = 1, y = 14
+x = 1, y = 15
+x = 1, y = 16
+x = 1, y = 17
+x = 1, y = 18
+x = 1, y = 19
+x = 2, y = 0
+x = 2, y = 1
+x = 2, y = 2
+x = 2, y = 3
+x = 2, y = 4
+x = 2, y = 5
+x = 2, y = 6
+x = 2, y = 7
+x = 2, y = 8
+x = 2, y = 9
+x = 2, y = 10
+x = 2, y = 11
+x = 2, y = 12
+x = 2, y = 13
+x = 2, y = 14
+x = 2, y = 15
+x = 2, y = 16
+x = 2, y = 17
+x = 2, y = 18
+x = 2, y = 19
+x = 3, y = 0
+x = 3, y = 1
+x = 3, y = 2
+x = 3, y = 3
+x = 3, y = 4
+x = 3, y = 5
+x = 3, y = 6
+x = 3, y = 7
+x = 3, y = 8
+x = 3, y = 9
+x = 3, y = 10
+x = 3, y = 11
+x = 3, y = 12
+x = 3, y = 13
+x = 3, y = 14
+x = 3, y = 15
+x = 3, y = 16
+x = 3, y = 17
+x = 3, y = 18
+x = 3, y = 19
+x = 4, y = 0
+x = 4, y = 1
+x = 4, y = 2
+x = 4, y = 3
+x = 4, y = 4
+x = 4, y = 5
+x = 4, y = 6
+x = 4, y = 7
+x = 4, y = 8
+x = 4, y = 9
+x = 4, y = 10
+x = 4, y = 11
+x = 4, y = 12
+x = 4, y = 13
+x = 4, y = 14
+x = 4, y = 15
+x = 4, y = 16
+x = 4, y = 17
+x = 4, y = 18
+x = 4, y = 19
+x = 5, y = 0
+x = 5, y = 1
+x = 5, y = 2
+x = 5, y = 3
+x = 5, y = 4
+x = 5, y = 5
+x = 5, y = 6
+x = 5, y = 7
+x = 5, y = 8
+x = 5, y = 9
+x = 5, y = 10
+x = 5, y = 11
+x = 5, y = 12
+x = 5, y = 13
+x = 5, y = 14
+x = 5, y = 15
+x = 5, y = 16
+x = 5, y = 17
+x = 5, y = 18
+x = 5, y = 19
+x = 6, y = 0
+x = 6, y = 1
+x = 6, y = 2
+x = 6, y = 3
+x = 6, y = 4
+x = 6, y = 5
+x = 6, y = 6
+x = 6, y = 7
+x = 6, y = 8
+x = 6, y = 9
+x = 6, y = 10
+x = 6, y = 11
+x = 6, y = 12
+x = 6, y = 13
+x = 6, y = 14
+x = 6, y = 15
+x = 6, y = 16
+x = 6, y = 17
+x = 6, y = 18
+x = 6, y = 19
+x = 7, y = 0
+x = 7, y = 1
+x = 7, y = 2
+x = 7, y = 3
+x = 7, y = 4
+x = 7, y = 5
+x = 7, y = 6
+x = 7, y = 7
+x = 7, y = 8
+x = 7, y = 9
+x = 7, y = 10
+x = 7, y = 11
+x = 7, y = 12
+x = 7, y = 13
+x = 7, y = 14
+x = 7, y = 15
+x = 7, y = 16
+x = 7, y = 17
+x = 7, y = 18
+x = 7, y = 19
+x = 8, y = 0
+x = 8, y = 1
+x = 8, y = 2
+x = 8, y = 3
+x = 8, y = 4
+x = 8, y = 5
+x = 8, y = 6
+x = 8, y = 7
+x = 8, y = 8
+x = 8, y = 9
+x = 8, y = 10
+x = 8, y = 11
+x = 8, y = 12
+x = 8, y = 13
+x = 8, y = 14
+x = 8, y = 15
+x = 8, y = 16
+x = 8, y = 17
+x = 8, y = 18
+x = 8, y = 19
+x = 9, y = 0
+x = 9, y = 1
+x = 9, y = 2
+x = 9, y = 3
+x = 9, y = 4
+x = 9, y = 5
+x = 9, y = 6
+x = 9, y = 7
+x = 9, y = 8
+x = 9, y = 9
+x = 9, y = 10
+x = 9, y = 11
+x = 9, y = 12
+x = 9, y = 13
+x = 9, y = 14
+x = 9, y = 15
+x = 9, y = 16
+x = 9, y = 17
+x = 9, y = 18
+x = 9, y = 19
+x = 10, y = 0
+x = 10, y = 1
+x = 10, y = 2
+x = 10, y = 3
+x = 10, y = 4
+x = 10, y = 5
+x = 10, y = 6
+x = 10, y = 7
+x = 10, y = 8
+x = 10, y = 9
+x = 10, y = 10
+x = 10, y = 11
+x = 10, y = 12
+x = 10, y = 13
+x = 10, y = 14
+x = 10, y = 15
+x = 10, y = 16
+x = 10, y = 17
+x = 10, y = 18
+x = 10, y = 19
+x = 11, y = 0
+x = 11, y = 1
+x = 11, y = 2
+x = 11, y = 3
+x = 11, y = 4
+x = 11, y = 5
+x = 11, y = 6
+x = 11, y = 7
+x = 11, y = 8
+x = 11, y = 9
+x = 11, y = 10
+x = 11, y = 11
+x = 11, y = 12
+x = 11, y = 13
+x = 11, y = 14
+x = 11, y = 15
+x = 11, y = 16
+x = 11, y = 17
+x = 11, y = 18
+x = 11, y = 19
+
+. 
+. * Men, misc section
+. * Creating matrix
+. * Rows: 240 cells; Columns: x cell, y cell, B, SE, p, N
+. matrix men_misc = J(240, 6, .)
+
+. matrix colnames men_misc = x y b se p n
+
+. local row = 0
+
+. foreach x of numlist 0/11 {
+  2.         foreach y of numlist 0/19 {
+  3.                 di "x = `x', y = `y'"
+  4.                 qui { 
+  5.                         reg x`x'y`y' i.parent if section == 4 & gender == 0
+  6.                         matrix reg_output = r(table)
+  7.                         
+.                         local row = `row' + 1
+  8.                         matrix men_misc[`row',1] = `x'
+  9.                         matrix men_misc[`row',2] = `y'
+ 10.                         matrix men_misc[`row',3] = reg_output[1,2] // B
+ 11.                         matrix men_misc[`row',4] = reg_output[2,2] // SE
+ 12.                         matrix men_misc[`row',5] = reg_output[4,2] // p
+ 13.                         matrix men_misc[`row',6] = e(N) // N
+ 14.                 }
+ 15.         }
+ 16. }
+x = 0, y = 0
+x = 0, y = 1
+x = 0, y = 2
+x = 0, y = 3
+x = 0, y = 4
+x = 0, y = 5
+x = 0, y = 6
+x = 0, y = 7
+x = 0, y = 8
+x = 0, y = 9
+x = 0, y = 10
+x = 0, y = 11
+x = 0, y = 12
+x = 0, y = 13
+x = 0, y = 14
+x = 0, y = 15
+x = 0, y = 16
+x = 0, y = 17
+x = 0, y = 18
+x = 0, y = 19
+x = 1, y = 0
+x = 1, y = 1
+x = 1, y = 2
+x = 1, y = 3
+x = 1, y = 4
+x = 1, y = 5
+x = 1, y = 6
+x = 1, y = 7
+x = 1, y = 8
+x = 1, y = 9
+x = 1, y = 10
+x = 1, y = 11
+x = 1, y = 12
+x = 1, y = 13
+x = 1, y = 14
+x = 1, y = 15
+x = 1, y = 16
+x = 1, y = 17
+x = 1, y = 18
+x = 1, y = 19
+x = 2, y = 0
+x = 2, y = 1
+x = 2, y = 2
+x = 2, y = 3
+x = 2, y = 4
+x = 2, y = 5
+x = 2, y = 6
+x = 2, y = 7
+x = 2, y = 8
+x = 2, y = 9
+x = 2, y = 10
+x = 2, y = 11
+x = 2, y = 12
+x = 2, y = 13
+x = 2, y = 14
+x = 2, y = 15
+x = 2, y = 16
+x = 2, y = 17
+x = 2, y = 18
+x = 2, y = 19
+x = 3, y = 0
+x = 3, y = 1
+x = 3, y = 2
+x = 3, y = 3
+x = 3, y = 4
+x = 3, y = 5
+x = 3, y = 6
+x = 3, y = 7
+x = 3, y = 8
+x = 3, y = 9
+x = 3, y = 10
+x = 3, y = 11
+x = 3, y = 12
+x = 3, y = 13
+x = 3, y = 14
+x = 3, y = 15
+x = 3, y = 16
+x = 3, y = 17
+x = 3, y = 18
+x = 3, y = 19
+x = 4, y = 0
+x = 4, y = 1
+x = 4, y = 2
+x = 4, y = 3
+x = 4, y = 4
+x = 4, y = 5
+x = 4, y = 6
+x = 4, y = 7
+x = 4, y = 8
+x = 4, y = 9
+x = 4, y = 10
+x = 4, y = 11
+x = 4, y = 12
+x = 4, y = 13
+x = 4, y = 14
+x = 4, y = 15
+x = 4, y = 16
+x = 4, y = 17
+x = 4, y = 18
+x = 4, y = 19
+x = 5, y = 0
+x = 5, y = 1
+x = 5, y = 2
+x = 5, y = 3
+x = 5, y = 4
+x = 5, y = 5
+x = 5, y = 6
+x = 5, y = 7
+x = 5, y = 8
+x = 5, y = 9
+x = 5, y = 10
+x = 5, y = 11
+x = 5, y = 12
+x = 5, y = 13
+x = 5, y = 14
+x = 5, y = 15
+x = 5, y = 16
+x = 5, y = 17
+x = 5, y = 18
+x = 5, y = 19
+x = 6, y = 0
+x = 6, y = 1
+x = 6, y = 2
+x = 6, y = 3
+x = 6, y = 4
+x = 6, y = 5
+x = 6, y = 6
+x = 6, y = 7
+x = 6, y = 8
+x = 6, y = 9
+x = 6, y = 10
+x = 6, y = 11
+x = 6, y = 12
+x = 6, y = 13
+x = 6, y = 14
+x = 6, y = 15
+x = 6, y = 16
+x = 6, y = 17
+x = 6, y = 18
+x = 6, y = 19
+x = 7, y = 0
+x = 7, y = 1
+x = 7, y = 2
+x = 7, y = 3
+x = 7, y = 4
+x = 7, y = 5
+x = 7, y = 6
+x = 7, y = 7
+x = 7, y = 8
+x = 7, y = 9
+x = 7, y = 10
+x = 7, y = 11
+x = 7, y = 12
+x = 7, y = 13
+x = 7, y = 14
+x = 7, y = 15
+x = 7, y = 16
+x = 7, y = 17
+x = 7, y = 18
+x = 7, y = 19
+x = 8, y = 0
+x = 8, y = 1
+x = 8, y = 2
+x = 8, y = 3
+x = 8, y = 4
+x = 8, y = 5
+x = 8, y = 6
+x = 8, y = 7
+x = 8, y = 8
+x = 8, y = 9
+x = 8, y = 10
+x = 8, y = 11
+x = 8, y = 12
+x = 8, y = 13
+x = 8, y = 14
+x = 8, y = 15
+x = 8, y = 16
+x = 8, y = 17
+x = 8, y = 18
+x = 8, y = 19
+x = 9, y = 0
+x = 9, y = 1
+x = 9, y = 2
+x = 9, y = 3
+x = 9, y = 4
+x = 9, y = 5
+x = 9, y = 6
+x = 9, y = 7
+x = 9, y = 8
+x = 9, y = 9
+x = 9, y = 10
+x = 9, y = 11
+x = 9, y = 12
+x = 9, y = 13
+x = 9, y = 14
+x = 9, y = 15
+x = 9, y = 16
+x = 9, y = 17
+x = 9, y = 18
+x = 9, y = 19
+x = 10, y = 0
+x = 10, y = 1
+x = 10, y = 2
+x = 10, y = 3
+x = 10, y = 4
+x = 10, y = 5
+x = 10, y = 6
+x = 10, y = 7
+x = 10, y = 8
+x = 10, y = 9
+x = 10, y = 10
+x = 10, y = 11
+x = 10, y = 12
+x = 10, y = 13
+x = 10, y = 14
+x = 10, y = 15
+x = 10, y = 16
+x = 10, y = 17
+x = 10, y = 18
+x = 10, y = 19
+x = 11, y = 0
+x = 11, y = 1
+x = 11, y = 2
+x = 11, y = 3
+x = 11, y = 4
+x = 11, y = 5
+x = 11, y = 6
+x = 11, y = 7
+x = 11, y = 8
+x = 11, y = 9
+x = 11, y = 10
+x = 11, y = 11
+x = 11, y = 12
+x = 11, y = 13
+x = 11, y = 14
+x = 11, y = 15
+x = 11, y = 16
+x = 11, y = 17
+x = 11, y = 18
+x = 11, y = 19
+
+. 
+. * Women, misc section
+. * Creating matrix
+. * Rows: 240 cells; Columns: x cell, y cell, B, SE, p, N
+. matrix women_misc = J(240, 6, .)
+
+. matrix colnames women_misc = x y b se p n
+
+. local row = 0
+
+. foreach x of numlist 0/11 {
+  2.         foreach y of numlist 0/19 {
+  3.                 di "x = `x', y = `y'"
+  4.                 qui { 
+  5.                         reg x`x'y`y' i.parent if section == 4 & gender == 1
+  6.                         matrix reg_output = r(table)
+  7.                         
+.                         local row = `row' + 1
+  8.                         matrix women_misc[`row',1] = `x'
+  9.                         matrix women_misc[`row',2] = `y'
+ 10.                         matrix women_misc[`row',3] = reg_output[1,2] // B
+ 11.                         matrix women_misc[`row',4] = reg_output[2,2] // SE
+ 12.                         matrix women_misc[`row',5] = reg_output[4,2] // p
+ 13.                         matrix women_misc[`row',6] = e(N) // N
+ 14.                 }
+ 15.         }
+ 16. }
+x = 0, y = 0
+x = 0, y = 1
+x = 0, y = 2
+x = 0, y = 3
+x = 0, y = 4
+x = 0, y = 5
+x = 0, y = 6
+x = 0, y = 7
+x = 0, y = 8
+x = 0, y = 9
+x = 0, y = 10
+x = 0, y = 11
+x = 0, y = 12
+x = 0, y = 13
+x = 0, y = 14
+x = 0, y = 15
+x = 0, y = 16
+x = 0, y = 17
+x = 0, y = 18
+x = 0, y = 19
+x = 1, y = 0
+x = 1, y = 1
+x = 1, y = 2
+x = 1, y = 3
+x = 1, y = 4
+x = 1, y = 5
+x = 1, y = 6
+x = 1, y = 7
+x = 1, y = 8
+x = 1, y = 9
+x = 1, y = 10
+x = 1, y = 11
+x = 1, y = 12
+x = 1, y = 13
+x = 1, y = 14
+x = 1, y = 15
+x = 1, y = 16
+x = 1, y = 17
+x = 1, y = 18
+x = 1, y = 19
+x = 2, y = 0
+x = 2, y = 1
+x = 2, y = 2
+x = 2, y = 3
+x = 2, y = 4
+x = 2, y = 5
+x = 2, y = 6
+x = 2, y = 7
+x = 2, y = 8
+x = 2, y = 9
+x = 2, y = 10
+x = 2, y = 11
+x = 2, y = 12
+x = 2, y = 13
+x = 2, y = 14
+x = 2, y = 15
+x = 2, y = 16
+x = 2, y = 17
+x = 2, y = 18
+x = 2, y = 19
+x = 3, y = 0
+x = 3, y = 1
+x = 3, y = 2
+x = 3, y = 3
+x = 3, y = 4
+x = 3, y = 5
+x = 3, y = 6
+x = 3, y = 7
+x = 3, y = 8
+x = 3, y = 9
+x = 3, y = 10
+x = 3, y = 11
+x = 3, y = 12
+x = 3, y = 13
+x = 3, y = 14
+x = 3, y = 15
+x = 3, y = 16
+x = 3, y = 17
+x = 3, y = 18
+x = 3, y = 19
+x = 4, y = 0
+x = 4, y = 1
+x = 4, y = 2
+x = 4, y = 3
+x = 4, y = 4
+x = 4, y = 5
+x = 4, y = 6
+x = 4, y = 7
+x = 4, y = 8
+x = 4, y = 9
+x = 4, y = 10
+x = 4, y = 11
+x = 4, y = 12
+x = 4, y = 13
+x = 4, y = 14
+x = 4, y = 15
+x = 4, y = 16
+x = 4, y = 17
+x = 4, y = 18
+x = 4, y = 19
+x = 5, y = 0
+x = 5, y = 1
+x = 5, y = 2
+x = 5, y = 3
+x = 5, y = 4
+x = 5, y = 5
+x = 5, y = 6
+x = 5, y = 7
+x = 5, y = 8
+x = 5, y = 9
+x = 5, y = 10
+x = 5, y = 11
+x = 5, y = 12
+x = 5, y = 13
+x = 5, y = 14
+x = 5, y = 15
+x = 5, y = 16
+x = 5, y = 17
+x = 5, y = 18
+x = 5, y = 19
+x = 6, y = 0
+x = 6, y = 1
+x = 6, y = 2
+x = 6, y = 3
+x = 6, y = 4
+x = 6, y = 5
+x = 6, y = 6
+x = 6, y = 7
+x = 6, y = 8
+x = 6, y = 9
+x = 6, y = 10
+x = 6, y = 11
+x = 6, y = 12
+x = 6, y = 13
+x = 6, y = 14
+x = 6, y = 15
+x = 6, y = 16
+x = 6, y = 17
+x = 6, y = 18
+x = 6, y = 19
+x = 7, y = 0
+x = 7, y = 1
+x = 7, y = 2
+x = 7, y = 3
+x = 7, y = 4
+x = 7, y = 5
+x = 7, y = 6
+x = 7, y = 7
+x = 7, y = 8
+x = 7, y = 9
+x = 7, y = 10
+x = 7, y = 11
+x = 7, y = 12
+x = 7, y = 13
+x = 7, y = 14
+x = 7, y = 15
+x = 7, y = 16
+x = 7, y = 17
+x = 7, y = 18
+x = 7, y = 19
+x = 8, y = 0
+x = 8, y = 1
+x = 8, y = 2
+x = 8, y = 3
+x = 8, y = 4
+x = 8, y = 5
+x = 8, y = 6
+x = 8, y = 7
+x = 8, y = 8
+x = 8, y = 9
+x = 8, y = 10
+x = 8, y = 11
+x = 8, y = 12
+x = 8, y = 13
+x = 8, y = 14
+x = 8, y = 15
+x = 8, y = 16
+x = 8, y = 17
+x = 8, y = 18
+x = 8, y = 19
+x = 9, y = 0
+x = 9, y = 1
+x = 9, y = 2
+x = 9, y = 3
+x = 9, y = 4
+x = 9, y = 5
+x = 9, y = 6
+x = 9, y = 7
+x = 9, y = 8
+x = 9, y = 9
+x = 9, y = 10
+x = 9, y = 11
+x = 9, y = 12
+x = 9, y = 13
+x = 9, y = 14
+x = 9, y = 15
+x = 9, y = 16
+x = 9, y = 17
+x = 9, y = 18
+x = 9, y = 19
+x = 10, y = 0
+x = 10, y = 1
+x = 10, y = 2
+x = 10, y = 3
+x = 10, y = 4
+x = 10, y = 5
+x = 10, y = 6
+x = 10, y = 7
+x = 10, y = 8
+x = 10, y = 9
+x = 10, y = 10
+x = 10, y = 11
+x = 10, y = 12
+x = 10, y = 13
+x = 10, y = 14
+x = 10, y = 15
+x = 10, y = 16
+x = 10, y = 17
+x = 10, y = 18
+x = 10, y = 19
+x = 11, y = 0
+x = 11, y = 1
+x = 11, y = 2
+x = 11, y = 3
+x = 11, y = 4
+x = 11, y = 5
+x = 11, y = 6
+x = 11, y = 7
+x = 11, y = 8
+x = 11, y = 9
+x = 11, y = 10
+x = 11, y = 11
+x = 11, y = 12
+x = 11, y = 13
+x = 11, y = 14
+x = 11, y = 15
+x = 11, y = 16
+x = 11, y = 17
+x = 11, y = 18
+x = 11, y = 19
+
+. 
+. * Save and output matrices -----------------------------------------------------
+. 
+. global groups "men_start women_start men_ed women_ed men_work women_work men_misc women_misc"
+
+. foreach g of global groups {
+  2.         svmat `g', names(col)
+  3.         gen p_star = "*" if p<.05
+  4.         preserve
+  5.                 keep x-p_star
+  6.                 drop if x==.
+  7.                 export delimited using "$output/`g'_mousecount_gaps_by_parent.csv", ///
+>                         replace
+  8.         restore
+  9.         drop x-p_star
+ 10. }
+(4,291 missing values generated)
+(4,051 observations deleted)
+file /Users/clairedaviss/Library/CloudStorage/GoogleDrive-cedaviss@gmail.com/.shortcut-targets-by-id/1rPhM1nXscu6uP-oHimucPUcyQ05iBPNL/study1/SMR Study 2 Replication Pac
+> kage/output/men_start_mousecount_gaps_by_parent.csv saved
+(4,290 missing values generated)
+(4,051 observations deleted)
+file /Users/clairedaviss/Library/CloudStorage/GoogleDrive-cedaviss@gmail.com/.shortcut-targets-by-id/1rPhM1nXscu6uP-oHimucPUcyQ05iBPNL/study1/SMR Study 2 Replication Pac
+> kage/output/women_start_mousecount_gaps_by_parent.csv saved
+(4,289 missing values generated)
+(4,051 observations deleted)
+file /Users/clairedaviss/Library/CloudStorage/GoogleDrive-cedaviss@gmail.com/.shortcut-targets-by-id/1rPhM1nXscu6uP-oHimucPUcyQ05iBPNL/study1/SMR Study 2 Replication Pac
+> kage/output/men_ed_mousecount_gaps_by_parent.csv saved
+(4,291 missing values generated)
+(4,051 observations deleted)
+file /Users/clairedaviss/Library/CloudStorage/GoogleDrive-cedaviss@gmail.com/.shortcut-targets-by-id/1rPhM1nXscu6uP-oHimucPUcyQ05iBPNL/study1/SMR Study 2 Replication Pac
+> kage/output/women_ed_mousecount_gaps_by_parent.csv saved
+(4,291 missing values generated)
+(4,051 observations deleted)
+file /Users/clairedaviss/Library/CloudStorage/GoogleDrive-cedaviss@gmail.com/.shortcut-targets-by-id/1rPhM1nXscu6uP-oHimucPUcyQ05iBPNL/study1/SMR Study 2 Replication Pac
+> kage/output/men_work_mousecount_gaps_by_parent.csv saved
+(4,289 missing values generated)
+(4,051 observations deleted)
+file /Users/clairedaviss/Library/CloudStorage/GoogleDrive-cedaviss@gmail.com/.shortcut-targets-by-id/1rPhM1nXscu6uP-oHimucPUcyQ05iBPNL/study1/SMR Study 2 Replication Pac
+> kage/output/women_work_mousecount_gaps_by_parent.csv saved
+(4,290 missing values generated)
+(4,051 observations deleted)
+file /Users/clairedaviss/Library/CloudStorage/GoogleDrive-cedaviss@gmail.com/.shortcut-targets-by-id/1rPhM1nXscu6uP-oHimucPUcyQ05iBPNL/study1/SMR Study 2 Replication Pac
+> kage/output/men_misc_mousecount_gaps_by_parent.csv saved
+(4,290 missing values generated)
+(4,051 observations deleted)
+file /Users/clairedaviss/Library/CloudStorage/GoogleDrive-cedaviss@gmail.com/.shortcut-targets-by-id/1rPhM1nXscu6uP-oHimucPUcyQ05iBPNL/study1/SMR Study 2 Replication Pac
+> kage/output/women_misc_mousecount_gaps_by_parent.csv saved
+
+. 
+. * LOG CLOSE ********************************************************************
+. log close
+      name:  <unnamed>
+       log:  /Users/clairedaviss/Library/CloudStorage/GoogleDrive-cedaviss@gmail.com/.shortcut-targets-by-id/1rPhM1nXscu6uP-oHimucPUcyQ05iBPNL/study1/SMR Study 2 Replica
+> tion Package/do/log/04_analyze_mouse_data_2024-06-17.log
+  log type:  text
+ closed on:  17 Jun 2024, 22:00:02
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------

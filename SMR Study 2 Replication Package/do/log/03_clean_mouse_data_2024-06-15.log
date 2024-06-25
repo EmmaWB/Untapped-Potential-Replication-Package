@@ -1,0 +1,532 @@
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Users/clairedaviss/Library/CloudStorage/GoogleDrive-cedaviss@gmail.com/.shortcut-targets-by-id/1rPhM1nXscu6uP-oHimucPUcyQ05iBPNL/study1/SMR Study 2 Replica
+> tion Package/do/log/03_clean_mouse_data_2024-06-15.log
+  log type:  text
+ opened on:  15 Jun 2024, 17:44:36
+
+. 
+. 
+. * Loading mouse data file ------------------------------------------------------
+. 
+. * Import CSV
+. import delimited userid time x y resume ///
+>         using "$data/rawdata/study2_mouse_raw_2021_06_16.csv", clear
+(5 vars, 374,127 obs)
+
+.                 
+. * Removing any odd characters from userid
+. charlist userid
+"0123456789abcdefghijklmnoprstuvwyz¯»¿ÂÃ
+
+. return list
+
+macros:
+              r(chars) : ""0123456789abcdefghijklmnoprstuvwyz¯»¿ÂÃ"
+           r(sepchars) : "" 0 1 2 3 4 5 6 7 8 9 a b c d e f g h i j k l m n o p r s t u v w y z ¯ » ¿ Â Ã "
+              r(ascii) : "34 48 49 50 51 52 53 54 55 56 57 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 114 115 116 117 118 119 121 122 175 187 191 1.."
+
+. display r(ascii)
+34 48 49 50 51 52 53 54 55 56 57 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 114 115 116 117 118 119 121 122 175 187 191 194 195 
+
+. foreach i of numlist 123/195 {
+  2.         qui replace userid = subinstr(userid, "`=char(`i')'", "", .)
+  3. }
+
+. replace userid = subinstr(userid, char(34), "", .) // removes quotation marks
+(1 real change made)
+
+. 
+. * Renaming resume code 
+. rename userid code // renaming to match
+
+. 
+. * Recoding resume numbers
+. replace resume=3 if resume==2 // Cand b = 3
+(142,409 real changes made)
+
+. replace resume=2 if resume==1 // Cand a = 2
+(231,718 real changes made)
+
+.         /* Note: this is necessary to merge with the other activity data and the
+>         Qualtrics survey data. */
+. 
+.         
+. * Merging with section status file ---------------------------------------------
+. 
+.         /* Note: Here we merge the mouse data with a dataset that notes the
+>         section status, that is which section was open at the time of each mouse
+>         movement. This dataset is created in the prior Do file 
+>         (01_data_cleanActivityData.do). */
+. 
+. * Merging file
+. merge m:1 code resume using "$data/study2_activity_section_status_wide.dta"
+
+    Result                           # of obs.
+    -----------------------------------------
+    not matched                        37,655
+        from master                    37,654  (_merge==1)
+        from using                          1  (_merge==2)
+
+    matched                           336,473  (_merge==3)
+    -----------------------------------------
+
+. tab code if _merge==2 // activity data, but no mouse data (wind78 is error)
+
+         code |      Freq.     Percent        Cum.
+--------------+-----------------------------------
+       wind78 |          1      100.00      100.00
+--------------+-----------------------------------
+        Total |          1      100.00
+
+. drop if _merge==2 
+(1 observation deleted)
+
+. tab code resume if _merge==1
+
+              |        resume
+         code |         2          3 |     Total
+--------------+----------------------+----------
+        air19 |         0          6 |         6 
+        air37 |       218          0 |       218 
+        air85 |        44          0 |        44 
+     alaska45 |       360          0 |       360 
+      beach30 |         4          0 |         4 
+      beach71 |         0         54 |        54 
+      beach88 |         4          0 |         4 
+       bike17 |       144         68 |       212 
+       blue55 |        12          0 |        12 
+       blue58 |         2          0 |         2 
+       blue63 |         2          0 |         2 
+       blue75 |         4          0 |         4 
+       blue90 |       360          0 |       360 
+       blue91 |         2          0 |         2 
+       boat10 |       360          0 |       360 
+       boat11 |       104          0 |       104 
+       boat45 |         0          4 |         4 
+       boat74 |       220          0 |       220 
+       boat83 |        54          0 |        54 
+     burger16 |       360          0 |       360 
+       cake48 |         2          0 |         2 
+        cake6 |       360        360 |       720 
+       cake90 |         2          0 |         2 
+     canal100 |        40          0 |        40 
+      canal57 |       360          0 |       360 
+      canal76 |         0         78 |        78 
+      canoe31 |         0         38 |        38 
+      canoe44 |         4          0 |         4 
+      canoe63 |       136         98 |       234 
+     canyon55 |        26          0 |        26 
+     canyon93 |       360          0 |       360 
+     carrot23 |        84          0 |        84 
+     carrot52 |       102          0 |       102 
+     carrot70 |        28          0 |        28 
+     carrot95 |        82         70 |       152 
+     carrot98 |        20          0 |        20 
+    chicken25 |       160         48 |       208 
+    chicken28 |        60          0 |        60 
+     cliff100 |       198          0 |       198 
+      cliff45 |       360          0 |       360 
+      cliff46 |        20          0 |        20 
+      cliff49 |         0        122 |       122 
+      cliff57 |         2          0 |         2 
+      cliff59 |        54         62 |       116 
+      cliff82 |        12          0 |        12 
+      cliff91 |       144          0 |       144 
+      cliff95 |         0         20 |        20 
+      cliff99 |       136          0 |       136 
+      climb21 |        20          0 |        20 
+     coffee29 |       100          0 |       100 
+     coffee42 |        26          0 |        26 
+     coffee54 |         2          0 |         2 
+     coffee57 |         4          0 |         4 
+     cookie49 |        42          0 |        42 
+     cookie80 |       232          0 |       232 
+     cookie97 |       118         96 |       214 
+      dinner2 |       360          0 |       360 
+     dinner41 |       100         58 |       158 
+     dinner49 |        10          0 |        10 
+     dinner53 |        86          0 |        86 
+     dinner86 |        10          0 |        10 
+       dive48 |       146          0 |       146 
+       dive64 |       130          0 |       130 
+       dive72 |       248          0 |       248 
+      drink20 |        76          0 |        76 
+      drink68 |        62          0 |        62 
+        eat13 |       138          0 |       138 
+        eat15 |        14          0 |        14 
+        eat18 |         8          0 |         8 
+        eat28 |       174          0 |       174 
+        eat38 |        14          0 |        14 
+       eggs45 |         6          8 |        14 
+       eggs59 |       360          0 |       360 
+       eggs61 |       252          0 |       252 
+       eggs67 |        84          0 |        84 
+       eggs94 |         8          0 |         8 
+       fall22 |        38          0 |        38 
+       fall62 |         6          0 |         6 
+       fall86 |       142         82 |       224 
+       field7 |        36          0 |        36 
+     florida3 |       360          0 |       360 
+    florida49 |       360          0 |       360 
+       gold26 |        62          0 |        62 
+       gold43 |       102          0 |       102 
+       gold76 |        16          0 |        16 
+       gold80 |         2          0 |         2 
+       green1 |       118         42 |       160 
+      green18 |         0        148 |       148 
+      green93 |        90          0 |        90 
+       hike18 |       146          0 |       146 
+       hike74 |       360          0 |       360 
+       hike86 |        18          0 |        18 
+       hill17 |        32          0 |        32 
+       hill79 |       360          0 |       360 
+        ice13 |        42          0 |        42 
+        ice19 |        92          0 |        92 
+        ice26 |        10          0 |        10 
+        ice43 |         4          0 |         4 
+     idaho100 |       112         68 |       180 
+      idaho28 |         4          0 |         4 
+      idaho84 |         6        336 |       342 
+      idaho87 |        58          0 |        58 
+     island65 |       360          0 |       360 
+     island76 |        90        164 |       254 
+     island91 |        52          0 |        52 
+      jump100 |       280          0 |       280 
+       jump60 |        48         46 |        94 
+        jump8 |        12          0 |        12 
+       left33 |       360          0 |       360 
+       left96 |       126          0 |       126 
+      lunch64 |         2          0 |         2 
+   mountain79 |         0        102 |       102 
+   mountain83 |        16          0 |        16 
+    mountain9 |       360          0 |       360 
+   mountain95 |        12          0 |        12 
+      north48 |        44          0 |        44 
+       ocean4 |        34          0 |        34 
+      ocean55 |       360          0 |       360 
+      ocean88 |        66         52 |       118 
+       ohio24 |       360          0 |       360 
+       ohio57 |        36          0 |        36 
+       ohio75 |       360          0 |       360 
+      olive20 |         8          0 |         8 
+      olive63 |        82          0 |        82 
+     orange95 |        22          0 |        22 
+       pants1 |         4          0 |         4 
+      pants62 |        54          0 |        54 
+      pants81 |         4          0 |         4 
+       pants9 |        92         48 |       140 
+       park13 |        44          0 |        44 
+       park17 |       248          0 |       248 
+        park5 |         2          0 |         2 
+       park54 |         0        360 |       360 
+       park80 |       194          0 |       194 
+        pen15 |         0         56 |        56 
+        pen38 |       274          0 |       274 
+        pen43 |         0         70 |        70 
+         pen6 |       148          0 |       148 
+        pen81 |        54          0 |        54 
+     pencil64 |       360          0 |       360 
+      pencil8 |         2          0 |         2 
+      phone32 |        10          0 |        10 
+      phone47 |         6          0 |         6 
+      phone69 |        54         38 |        92 
+      phone77 |       360          0 |       360 
+      phone90 |       360          0 |       360 
+       pink44 |       234          0 |       234 
+       pink64 |         4          0 |         4 
+       pink69 |        24          0 |        24 
+       pink73 |       120          0 |       120 
+      pizza21 |         2          0 |         2 
+      pizza83 |        26          0 |        26 
+     planet13 |         0        120 |       120 
+     planet20 |        56         30 |        86 
+     planet27 |       360          0 |       360 
+     planet94 |       120          0 |       120 
+      plant61 |         4          0 |         4 
+      plant81 |         2          0 |         2 
+       pond28 |       168          0 |       168 
+       pond31 |       100          0 |       100 
+       pond69 |        18          0 |        18 
+       pond95 |        76         30 |       106 
+       pond96 |         6          0 |         6 
+      purple2 |         2          0 |         2 
+      purple5 |         0        204 |       204 
+     purple64 |       340          0 |       340 
+     purple74 |         2          0 |         2 
+     purple86 |        94          0 |        94 
+       rain54 |         4          0 |         4 
+       rain67 |        92          0 |        92 
+        red17 |         4          0 |         4 
+        red31 |       360          0 |       360 
+        red69 |        72          0 |        72 
+        red79 |         2          0 |         2 
+       rice23 |         0         80 |        80 
+       rice35 |        12          0 |        12 
+       rice64 |       218          0 |       218 
+       rice92 |         0        122 |       122 
+       right1 |         2          0 |         2 
+      right87 |        12          0 |        12 
+      river16 |       132          0 |       132 
+      river23 |       104         36 |       140 
+      river32 |        90          0 |        90 
+      river61 |         2          0 |         2 
+      river74 |         2          0 |         2 
+       road88 |       360          0 |       360 
+        run23 |         0        170 |       170 
+         run7 |        28          0 |        28 
+        run88 |         0         62 |        62 
+      salad41 |       360          0 |       360 
+      salad44 |       130          0 |       130 
+       sand45 |       216          0 |       216 
+       sand58 |       360          0 |       360 
+        sand6 |         2          0 |         2 
+       sand68 |         0        110 |       110 
+       sand80 |       360          0 |       360 
+      shell21 |       116          0 |       116 
+      shell26 |         4          0 |         4 
+      shell39 |         2          0 |         2 
+      shell43 |       330          0 |       330 
+      shell59 |        76          0 |        76 
+      shirt82 |        44          0 |        44 
+     silver40 |         0        110 |       110 
+     silver87 |         2          0 |         2 
+     silver97 |       142         68 |       210 
+      sleep11 |         0        126 |       126 
+      sleep18 |         2          0 |         2 
+      sleep28 |        76          0 |        76 
+      sleep88 |        38         16 |        54 
+      sleep90 |         8          0 |         8 
+      smoke51 |       146          0 |       146 
+      smoke58 |         0         62 |        62 
+      smoke60 |       360          0 |       360 
+      smoke93 |         0        192 |       192 
+     snack100 |       360          0 |       360 
+      snack44 |         0         46 |        46 
+      snack82 |       138          0 |       138 
+       snow27 |       356          0 |       356 
+       snow36 |       178          0 |       178 
+       snow41 |       102         80 |       182 
+       snow44 |       360          0 |       360 
+       snow53 |        36          0 |        36 
+       snow57 |         4          0 |         4 
+       snow71 |       246          0 |       246 
+       soda19 |       360          0 |       360 
+       soda51 |         0        148 |       148 
+        soda9 |        26          0 |        26 
+       soup11 |        10          0 |        10 
+       soup39 |        88          0 |        88 
+       soup42 |        60          0 |        60 
+       soup43 |         0        202 |       202 
+      south50 |        12          0 |        12 
+      storm16 |       160          0 |       160 
+      storm31 |       214          0 |       214 
+       storm4 |        12          0 |        12 
+      storm46 |       360          0 |       360 
+      storm78 |       360          0 |       360 
+      storm91 |         4          0 |         4 
+     stream28 |        24          0 |        24 
+     stream33 |        80         54 |       134 
+     stream66 |       360          0 |       360 
+      stream9 |       100          0 |       100 
+      street2 |         6          0 |         6 
+     street28 |         2          0 |         2 
+     street62 |       360          0 |       360 
+     street73 |        18          0 |        18 
+     street75 |        44          0 |        44 
+     street76 |       360          0 |       360 
+     street99 |       134          0 |       134 
+       surf54 |        12          0 |        12 
+       surf79 |       204          0 |       204 
+       surf94 |         4          4 |         8 
+       swim67 |        36          0 |        36 
+        tea29 |       360          0 |       360 
+        tea36 |         0        202 |       202 
+        tea60 |        54          0 |        54 
+        tea95 |        44          0 |        44 
+    thunder19 |         0         70 |        70 
+    thunder37 |        50          0 |        50 
+    thunder47 |       360          0 |       360 
+    thunder48 |       360          0 |       360 
+    thunder55 |        14          0 |        14 
+    thunder60 |        54         42 |        96 
+    thunder75 |       360          0 |       360 
+    thunder88 |       360          0 |       360 
+        tire1 |       360          0 |       360 
+       tire24 |         4          0 |         4 
+        tire8 |        94          0 |        94 
+       tire89 |       360          0 |       360 
+    traffic14 |         0        136 |       136 
+     traffic3 |        36          0 |        36 
+     traffic6 |        14          0 |        14 
+       tree35 |       158          0 |       158 
+       tree48 |         2          0 |         2 
+       tree58 |         6          6 |        12 
+       tree64 |        80          0 |        80 
+       tree92 |        54          0 |        54 
+       tree96 |        28         20 |        48 
+   umbrella55 |       342          0 |       342 
+    umbrella6 |         4          0 |         4 
+   umbrella75 |       166          0 |       166 
+   umbrella86 |         4          0 |         4 
+       wake11 |       162          0 |       162 
+       wake64 |         0         58 |        58 
+      waves12 |         0        164 |       164 
+       waves6 |        74         90 |       164 
+       west58 |       270          0 |       270 
+       west61 |         4          0 |         4 
+       west95 |        26          0 |        26 
+       wind18 |        82         48 |       130 
+       wind98 |         2          0 |         2 
+     yellow47 |       106          0 |       106 
+     yellow56 |       138          0 |       138 
+      yellow6 |       360          0 |       360 
+     yellow70 |         2          0 |         2 
+--------------+----------------------+----------
+        Total |    31,944      5,710 |    37,654 
+
+. 
+.         /* Note: _merge==1 means that there is mouse data but no activity data -- 
+>         meaning, they entered the website but never opened a section. This could be 
+>         an error, or could reflect an actual way that a few respondents interacted
+>         with the resume. We thus keep these data. */
+. 
+. * Changing time variable to time format
+. gen double dt = clock(time, "M D Y hms")
+
+. format dt %tc
+
+. drop time
+
+. rename dt time
+
+. 
+. * Generating section status variable
+. sort code resume time
+
+. gen section=1, after(resume) // default is "start" section
+
+. label val section section_lbl
+
+. foreach i of numlist 1/26 { // 26 is the maximum number of section start/end 
+  2. * times in this dataset
+.         qui replace section=section`i' if time>=section_start`i'
+  3. }
+
+.         /* Note: Here we create one "section" variable that indicates the section
+>         that was open at the time of each mouse movement. */
+.         
+. * Keeping only current section status
+. drop section1-_merge
+
+. 
+. * Cleaning mouse data across section statuses ----------------------------------
+. 
+. * Remove coordinates out of range (errors)
+. histogram x
+(bin=55, start=0, width=23.290909)
+
+. keep if x <= 600                                                                                                                                
+(5,702 observations deleted)
+
+. histogram y
+(bin=55, start=0, width=18.472727)
+
+. histogram y if y>800
+(bin=46, start=801, width=4.673913)
+
+. keep if y <= 950
+(238 observations deleted)
+
+. /* Note: The code was setup to collect mouse track movements within a range
+> from 600 to 950. Mouse track movements that appear outside of that region
+> are apparent errors and uninterpretable. */
+. 
+. * Create reversed version of y, such that (0,0) corresponds to bottom left of
+. * interactive digital resume
+. gen rev_y = 950 - y
+
+. sum rev_y
+
+    Variable |        Obs        Mean    Std. Dev.       Min        Max
+-------------+---------------------------------------------------------
+       rev_y |    368,187    452.3906    248.0517          0        950
+
+. 
+. * Creating cells for analysis
+. gen x_tc = x
+
+. replace x_tc = 599 if x == 600 // include 600 in 599 x coordinates
+(2 real changes made)
+
+. gen x_cell = floor(x_tc/50)
+
+. 
+. gen y_tc = y
+
+. replace y_tc = 949 if rev_y == 950 // include 950 in 949 y coordinates
+(29,118 real changes made)
+
+. gen y_cell = floor(y_tc/50)
+
+. 
+. sum *_cell // value corresponds to top left coordinate for cell
+
+    Variable |        Obs        Mean    Std. Dev.       Min        Max
+-------------+---------------------------------------------------------
+      x_cell |    368,187    6.116264    3.833104          0         11
+      y_cell |    368,187    10.93479    4.539142          0         19
+
+. 
+. * Sum of mouse tracks per cell
+. bysort code resume section x_cell y_cell: gen mousecount = _N
+
+. 
+. * Save datasets ---------------------------------------------------------------
+. 
+. * Saving long data
+. * Each line is a mouse track
+. save "$data/study2_mouse_long.dta", replace
+file /Users/clairedaviss/Library/CloudStorage/GoogleDrive-cedaviss@gmail.com/.shortcut-targets-by-id/1rPhM1nXscu6uP-oHimucPUcyQ05iBPNL/study1/SMR Study 2 Replication Pac
+> kage/data/study2_mouse_long.dta saved
+
+. export delimited using "$data/study2_mouse_long.csv", replace
+file /Users/clairedaviss/Library/CloudStorage/GoogleDrive-cedaviss@gmail.com/.shortcut-targets-by-id/1rPhM1nXscu6uP-oHimucPUcyQ05iBPNL/study1/SMR Study 2 Replication Pac
+> kage/data/study2_mouse_long.csv saved
+
+. 
+. * Creating wider data
+. * Each line is a code*resume*section combination
+. foreach x of numlist 0/11 {
+  2.         foreach y of numlist 0/18 {
+  3.                 qui gen x`x'y`y' = mousecount if x_cell == `x' & y_cell == `y'
+  4.                 qui replace x`x'y`y' = 0 if x`x'y`y' == .
+  5.                 qui bysort code resume section: ereplace x`x'y`y' = total(x`x'y`y')
+  6.         }
+  7. }
+
+. keep code resume section x0y0-x11y18
+
+. duplicates drop
+
+Duplicates in terms of all variables
+
+(362,906 observations deleted)
+
+. save "$data/study2_mouse_wide.dta", replace
+file /Users/clairedaviss/Library/CloudStorage/GoogleDrive-cedaviss@gmail.com/.shortcut-targets-by-id/1rPhM1nXscu6uP-oHimucPUcyQ05iBPNL/study1/SMR Study 2 Replication Pac
+> kage/data/study2_mouse_wide.dta saved
+
+. export delimited using "$data/study2_mouse_wide.csv", replace
+file /Users/clairedaviss/Library/CloudStorage/GoogleDrive-cedaviss@gmail.com/.shortcut-targets-by-id/1rPhM1nXscu6uP-oHimucPUcyQ05iBPNL/study1/SMR Study 2 Replication Pac
+> kage/data/study2_mouse_wide.csv saved
+
+. 
+. * Log close --------------------------------------------------------------------
+. log close
+      name:  <unnamed>
+       log:  /Users/clairedaviss/Library/CloudStorage/GoogleDrive-cedaviss@gmail.com/.shortcut-targets-by-id/1rPhM1nXscu6uP-oHimucPUcyQ05iBPNL/study1/SMR Study 2 Replica
+> tion Package/do/log/03_clean_mouse_data_2024-06-15.log
+  log type:  text
+ closed on:  15 Jun 2024, 17:48:04
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
