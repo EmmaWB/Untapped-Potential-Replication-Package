@@ -1,0 +1,777 @@
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+      name:  <unnamed>
+       log:  /Users/clairedaviss/Library/CloudStorage/GoogleDrive-cedaviss@gmail.com/.shortcut-targets-by-id/1rPhM1nXscu6uP-oHimucPUcyQ05iBPNL/study1/SMR Study 2 Replica
+> tion Package/do/log/01_clean_activity_data_2024-06-15.log
+  log type:  text
+ opened on:  15 Jun 2024, 17:44:27
+
+. 
+. 
+. * Load data --------------------------------------------------------------------
+. 
+. * Import CSV of activity data
+. import delimited userid time desc resume ///
+>         using "$data/rawdata/study2_activity_raw_2021_05_06_346pm.csv", clear
+(4 vars, 12,256 obs)
+
+.         
+. * Removing any odd characters from userid
+. charlist userid
+"0123456789abcdefghijklmnoprstuvwyz¯»¿ÂÃ
+
+. return list
+
+macros:
+              r(chars) : ""0123456789abcdefghijklmnoprstuvwyz¯»¿ÂÃ"
+           r(sepchars) : "" 0 1 2 3 4 5 6 7 8 9 a b c d e f g h i j k l m n o p r s t u v w y z ¯ » ¿ Â Ã "
+              r(ascii) : "34 48 49 50 51 52 53 54 55 56 57 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 114 115 116 117 118 119 121 122 175 187 191 1.."
+
+. display r(ascii)
+34 48 49 50 51 52 53 54 55 56 57 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 114 115 116 117 118 119 121 122 175 187 191 194 195 
+
+. foreach i of numlist 123/195 {
+  2.         replace userid = subinstr(userid, "`=char(`i')'", "", .)
+  3. }
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(1 real change made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(1 real change made)
+(0 real changes made)
+(0 real changes made)
+(0 real changes made)
+(1 real change made)
+(0 real changes made)
+(0 real changes made)
+(1 real change made)
+(1 real change made)
+
+. replace userid = subinstr(userid, char(34), "", .) // removes quotation marks
+(1 real change made)
+
+. 
+. * Removing observations with missing activity descriptions      
+. tab desc, m // descriptions for all the activities
+
+                           desc |      Freq.     Percent        Cum.
+--------------------------------+-----------------------------------
+                                |         40        0.33        0.33
+  clicked education_down button |         60        0.49        0.82
+     clicked education_q button |        178        1.45        2.27
+    clicked education_up button |        650        5.30        7.57
+       clicked misc_down button |         95        0.78        8.35
+          clicked misc_q button |        227        1.85       10.20
+         clicked misc_up button |        475        3.88       14.07
+      clicked notes_down button |        141        1.15       15.23
+         clicked notes_q button |        214        1.75       16.97
+        clicked notes_up button |        599        4.89       21.86
+      clicked work1_down button |         93        0.76       22.62
+         clicked work1_q button |        266        2.17       24.79
+        clicked work1_up button |        602        4.91       29.70
+      clicked work2_down button |         89        0.73       30.43
+         clicked work2_q button |        210        1.71       32.14
+        clicked work2_up button |        561        4.58       36.72
+      clicked work3_down button |          2        0.02       36.73
+         clicked work3_q button |          1        0.01       36.74
+        clicked work3_up button |          3        0.02       36.77
+         clicked work4_q button |          3        0.02       36.79
+        clicked work4_up button |          4        0.03       36.82
+       closed education section |        214        1.75       38.57
+            closed misc section |        116        0.95       39.52
+            closed work section |        121        0.99       40.50
+                entered website |      1,654       13.50       54.00
+       opened education section |      1,983       16.18       70.18
+            opened misc section |      1,340       10.93       81.11
+            opened work section |      2,102       17.15       98.26
+unclicked education_down button |         12        0.10       98.36
+   unclicked education_q button |          6        0.05       98.41
+  unclicked education_up button |         20        0.16       98.57
+     unclicked misc_down button |         12        0.10       98.67
+        unclicked misc_q button |          5        0.04       98.71
+       unclicked misc_up button |         13        0.11       98.82
+    unclicked notes_down button |         28        0.23       99.05
+       unclicked notes_q button |         13        0.11       99.15
+      unclicked notes_up button |         42        0.34       99.49
+    unclicked work1_down button |          8        0.07       99.56
+       unclicked work1_q button |          5        0.04       99.60
+      unclicked work1_up button |         14        0.11       99.71
+    unclicked work2_down button |         12        0.10       99.81
+       unclicked work2_q button |          5        0.04       99.85
+      unclicked work2_up button |         18        0.15      100.00
+--------------------------------+-----------------------------------
+                          Total |     12,256      100.00
+
+. drop if desc==""
+(40 observations deleted)
+
+. 
+. * Renaming userid       
+. rename userid code
+
+.         /* Note:  It's important to rename the "userid" variable to "code" so that it
+>         can merge with the Qualtrics survey data. */
+. 
+. * Sorting data
+. sort code resume
+
+. 
+. * Replacing resume number with 2 or 3
+. replace resume = 3 if resume==2
+(5,116 real changes made)
+
+. replace resume = 2 if resume==1
+(7,100 real changes made)
+
+.         /* Note: this is necessary to merge with Qualtrics data. Practice = 1, 
+>         Candidate A = 2, and Candidate B = 3. */
+. 
+. * Generating button variables --------------------------------------------------
+. 
+. * Coding buttons
+. global buttons "notes education work1 work2 misc"
+
+. foreach b of global buttons {
+  2.         gen button_`b'=.
+  3.         replace button_`b'=1 if desc=="clicked `b'_up button"
+  4.         replace button_`b'=2 if desc=="clicked `b'_q button"
+  5.         replace button_`b'=3 if desc=="clicked `b'_down button"
+  6.         replace button_`b'=4 if desc=="unclicked `b'_up button"
+  7.         replace button_`b'=5 if desc=="unclicked `b'_q button"
+  8.         replace button_`b'=6 if desc=="unclicked `b'_down button"
+  9. }
+(12,216 missing values generated)
+(599 real changes made)
+(214 real changes made)
+(141 real changes made)
+(42 real changes made)
+(13 real changes made)
+(28 real changes made)
+(12,216 missing values generated)
+(650 real changes made)
+(178 real changes made)
+(60 real changes made)
+(20 real changes made)
+(6 real changes made)
+(12 real changes made)
+(12,216 missing values generated)
+(602 real changes made)
+(266 real changes made)
+(93 real changes made)
+(14 real changes made)
+(5 real changes made)
+(8 real changes made)
+(12,216 missing values generated)
+(561 real changes made)
+(210 real changes made)
+(89 real changes made)
+(18 real changes made)
+(5 real changes made)
+(12 real changes made)
+(12,216 missing values generated)
+(475 real changes made)
+(227 real changes made)
+(95 real changes made)
+(13 real changes made)
+(5 real changes made)
+(12 real changes made)
+
+. 
+. * Creating variable: button status
+. label def buttonstat_lbl 1 "Blank" 2 "Up" 3 "Circle" 4 "Down"
+
+. foreach b of global buttons {
+  2.         bysort code resume: gen buttonstat_`b'=1 if _n==1
+  3.         label val buttonstat_`b' buttonstat_lbl
+  4. 
+.         replace buttonstat_`b'=2 if button_`b'==1
+  5.         replace buttonstat_`b'=1 if button_`b'==4
+  6.         replace buttonstat_`b'=3 if button_`b'==2
+  7.         replace buttonstat_`b'=1 if button_`b'==5
+  8.         replace buttonstat_`b'=4 if button_`b'==3
+  9.         replace buttonstat_`b'=1 if button_`b'==6
+ 10. 
+.         sort code resume time button_`b'
+ 11.         replace buttonstat_`b'=buttonstat_`b'[_n-1] if code==code[_n-1] & ///
+>                 resume==resume[_n-1] & buttonstat_`b'==.
+ 12. }
+(10,561 missing values generated)
+(599 real changes made)
+(38 real changes made)
+(214 real changes made)
+(12 real changes made)
+(141 real changes made)
+(27 real changes made)
+(6,477 real changes made)
+(10,561 missing values generated)
+(650 real changes made)
+(20 real changes made)
+(178 real changes made)
+(6 real changes made)
+(60 real changes made)
+(12 real changes made)
+(9,624 real changes made)
+(10,561 missing values generated)
+(602 real changes made)
+(14 real changes made)
+(266 real changes made)
+(5 real changes made)
+(93 real changes made)
+(8 real changes made)
+(9,563 real changes made)
+(10,561 missing values generated)
+(561 real changes made)
+(18 real changes made)
+(210 real changes made)
+(5 real changes made)
+(89 real changes made)
+(12 real changes made)
+(9,649 real changes made)
+(10,561 missing values generated)
+(475 real changes made)
+(13 real changes made)
+(227 real changes made)
+(5 real changes made)
+(95 real changes made)
+(12 real changes made)
+(9,715 real changes made)
+
+. 
+. * Creating variable: end buttons
+. foreach b of global buttons {
+  2.         by code resume: gen endbutton_`b'=buttonstat_`b'[_N]
+  3.         label val endbutton_`b' buttonstat_lbl
+  4. }
+(12 missing values generated)
+(6 missing values generated)
+(6 missing values generated)
+
+. 
+. * Creating variables: total up, down, circle reaction buttons
+. local allbuttons "button_notes button_education button_work1 button_work2 button_misc"
+
+. egen temp_total_up = anycount(`allbuttons'), v(1)
+
+. bysort code resume: egen total_up = total(temp_total_up)
+
+. 
+. local allbuttons "button_notes button_education button_work1 button_work2 button_misc"
+
+. egen temp_total_down = anycount(`allbuttons'), v(3)
+
+. bysort code resume: egen total_down = total(temp_total_down)
+
+. 
+. local allbuttons "button_notes button_education button_work1 button_work2 button_misc"
+
+. egen temp_total_circle = anycount(`allbuttons'), v(2)
+
+. bysort code resume: egen total_circle = total(temp_total_circle)
+
+. 
+. * Creating variables: sum of activities (all, site, section, and button)
+. by code resume: gen activities = _N
+
+. 
+. gen acts_site=1 if desc=="entered website"
+(10,562 missing values generated)
+
+. 
+. gen acts_section=1 if desc== "opened education section" 
+(10,233 missing values generated)
+
+. replace acts_section=1 if desc=="opened work section"
+(2,102 real changes made)
+
+. replace acts_section=1 if desc=="opened misc section"
+(1,340 real changes made)
+
+. 
+. gen acts_button=.
+(12,216 missing values generated)
+
+. foreach b of global buttons { // sets N_button equal to 1 if person clicked a button
+  2.         replace acts_button=1 if desc=="clicked `b'_up button"
+  3.         replace acts_button=1 if desc=="clicked `b'_q button"
+  4.         replace acts_button=1 if desc=="clicked `b'_down button"
+  5.         replace acts_button=1 if desc=="unclicked `b'_up button"
+  6.         replace acts_button=1 if desc=="unclicked `b'_q button"
+  7.         replace acts_button=1 if desc=="unclicked `b'_down button"
+  8. }
+(599 real changes made)
+(214 real changes made)
+(141 real changes made)
+(42 real changes made)
+(13 real changes made)
+(28 real changes made)
+(650 real changes made)
+(178 real changes made)
+(60 real changes made)
+(20 real changes made)
+(6 real changes made)
+(12 real changes made)
+(602 real changes made)
+(266 real changes made)
+(93 real changes made)
+(14 real changes made)
+(5 real changes made)
+(8 real changes made)
+(561 real changes made)
+(210 real changes made)
+(89 real changes made)
+(18 real changes made)
+(5 real changes made)
+(12 real changes made)
+(475 real changes made)
+(227 real changes made)
+(95 real changes made)
+(13 real changes made)
+(5 real changes made)
+(12 real changes made)
+
+. 
+. by code resume: ereplace acts_site = total(acts_site)
+(10,562 real changes made)
+
+. by code resume: ereplace acts_section = total(acts_section)
+(12,168 real changes made)
+
+. by code resume: ereplace acts_button = total(acts_button)
+(12,143 real changes made)
+
+. 
+. 
+. * Creating section status variables --------------------------------------------
+. 
+. * Which section is open
+. gen section=.
+(12,216 missing values generated)
+
+. cap label drop section_lbl
+
+. label def section_lbl 1 "Start" 2 "Education Open" 3 "Work Open" 4 "Misc Open"
+
+. label val section section_lbl
+
+. 
+. * Setting sections open according to "opened" buttons
+. replace section=1 if desc=="entered website"
+(1,654 real changes made)
+
+. replace section=2 if desc=="opened education section"
+(1,983 real changes made)
+
+. replace section=3 if desc=="opened work section"
+(2,102 real changes made)
+
+. replace section=4 if desc=="opened misc section"
+(1,340 real changes made)
+
+. 
+. * If respondent "closes" a section, returns to "start"
+. replace section=1 if desc=="closed education section" | ///
+>         desc=="closed work section" | desc=="closed misc section"
+(451 real changes made)
+
+. 
+. /* Filling in missing values
+> sort code resume time // resort for all activities
+> replace section=section[_n-1] if section==. & code==code[_n-1] & ///
+>         resume==resume[_n-1] */
+. 
+. * Creating variables for ever opened ed, work, or misc sections
+. gen ever_ed             =       section==2
+
+. gen ever_work   =       section==3
+
+. gen ever_misc   =       section==4
+
+. 
+. bysort code resume: ereplace ever_ed    =       max(ever_ed)
+(9,793 real changes made)
+
+. by code resume:         ereplace ever_work      =       max(ever_work)
+(9,714 real changes made)
+
+. by code resume:         ereplace ever_misc      =       max(ever_misc)
+(9,372 real changes made)
+
+. 
+. * Creating variable: ever opened all sections
+. gen ever_all = .
+(12,216 missing values generated)
+
+. replace ever_all = 1 if ever_ed == 1 & ever_work == 1 & ever_misc == 1
+(10,657 real changes made)
+
+. replace ever_all = 0 if acts_site == 1 & (ever_ed != 1 | ever_work != 1 | ///
+>         ever_misc != 1)
+(1,552 real changes made)
+
+. 
+.         
+. * Timing variables -------------------------------------------------------------
+. 
+. * Generating temporary variable to flag section activities
+. gen section_tag=section!=.
+
+. 
+. * Creating variable: time of first/last activity
+. gen double timestamp = clock(time, "MDY hms")
+
+. bysort code resume: egen double mintime = min(timestamp)
+
+. bysort code resume: egen double maxtime = max(timestamp)
+
+. format timestamp mintime maxtime %tc
+
+. gen tottime = seconds(maxtime - mintime)
+
+. gen totminutes = tottime/60
+
+. 
+. * Section open start times
+. gen double section_start=clock(time, "MDY hms") if section!=.
+(4,686 missing values generated)
+
+. format section_start %tc
+
+. 
+. * Section close end times
+. sort code resume section_tag timestamp
+
+. gen double section_end = section_start[_n+1] if code==code[_n+1] & ///
+>         resume==resume[_n+1] & section_tag==1
+(6,341 missing values generated)
+
+. format section_end %tc
+
+. replace section_end=maxtime if section_end==. & section_tag==1
+(1,655 real changes made)
+
+. 
+. * Section total time
+. gen sectiontime = seconds(section_end - section_start)
+(4,686 missing values generated)
+
+. 
+. * Total time in each section
+. bysort code resume section: egen starttime = total(sectiontime) if section==1
+(10111 missing values generated)
+
+. bysort code resume section: egen edutime =      total(sectiontime)      if section==2
+(10233 missing values generated)
+
+. bysort code resume section: egen worktime = total(sectiontime)  if section==3
+(10114 missing values generated)
+
+. bysort code resume section: egen misctime = total(sectiontime)  if section==4
+(10876 missing values generated)
+
+.         
+. foreach v of varlist starttime edutime worktime misctime {
+  2.         bysort code resume: ereplace `v' = max(`v')
+  3.         replace `v' = 0 if `v' == . // set missing equal to 0
+  4. }       
+(7 missing values generated)
+(10,104 real changes made)
+(7 real changes made)
+(440 missing values generated)
+(9,793 real changes made)
+(440 real changes made)
+(400 missing values generated)
+(9,714 real changes made)
+(400 real changes made)
+(1504 missing values generated)
+(9,372 real changes made)
+(1,504 real changes made)
+
+.         /* Note: There is only one of each of these values per code/resume 
+>         combination. The above code will make the value the same across
+>         code/resume. */
+. 
+.         
+. * Applying labels --------------------------------------------------------------
+. 
+. label var code                          "Website Code"
+
+. label var time                          "Activity Time"
+
+. label var desc                          "Activity Description"
+
+. label var resume                        "Candidate Number"
+
+. label var button_notes          "Activity Clicked Notes Button"
+
+. label var button_education      "Activity Clicked Education Button"
+
+. label var button_work1          "Activity Clicked Work1 Button"
+
+. label var button_work2          "Activity Clicked Work2 Button"
+
+. label var buttonstat_notes      "Button Status Notes"
+
+. label var buttonstat_edu        "Button Status Education"
+
+. label var buttonstat_work1      "Button Status Work1"
+
+. label var buttonstat_work2      "Button Status Work2"
+
+. label var endbutton_notes       "Button Status at End - Notes"
+
+. label var endbutton_edu         "Button Status at End - Education"
+
+. label var endbutton_work1       "Button Status at End - Work1"
+
+. label var endbutton_work2       "Button Status at End - Work2"
+
+. label var activities            "Total Number of Activities"
+
+. label var acts_site                     "Total Times Entered Website"
+
+. label var acts_button           "Total Times Clicked Button"
+
+. label var acts_section          "Total Times Clicked Section"
+
+. label var section                       "Section Open"
+
+. label var section_tag           "Activity is Section Open/Close"
+
+. label var ever_ed                       "Whether Ever Opened Education Section"
+
+. label var ever_work                     "Whether Ever Opened Work Section"
+
+. label var ever_misc                     "Whether Ever Opened Misc Section"
+
+. label var timestamp                     "Activity Timestamp"
+
+. label var mintime                       "Earliest Activity Timestamp"
+
+. label var maxtime                       "Latest Activity Timestamp"
+
+. label var tottime                       "Total Time Spent on Resume in Seconds"
+
+. label var totmin                        "Total Time Spent on Resume in Minutes"
+
+. label var section_start         "Section Start Time"
+
+. label var section_end           "Section End Time"
+
+. label var sectiontime           "Section Open Duration (Seconds)"
+
+. label var starttime                     "Total Time Start Section Open"
+
+. label var edutime                       "Total Time Educaiton Section Open"
+
+. label var worktime                      "Total Time Work Section Open"
+
+. label var misctime                      "Total Time Misc Section Open"
+
+. label var total_up                      "Total times ever clicked any up buttons (even if unclicked later)"
+
+. label var total_circle          "Total times ever clicked any circle buttons (even if unclicked later)"
+
+. label var total_down            "Total times ever clicked any down buttons (even if unclicked later)"
+
+. 
+. 
+. * Creating subset of full dataset, with just section start times ---------------
+. 
+. * Subsetting data
+. preserve
+
+. keep if section_tag==1
+(4,686 observations deleted)
+
+. keep code resume section section_start
+
+. sort code resume section_start section
+
+. 
+. * Tagging the first section button
+. bysort code resume (section_start section): gen sn = _n
+
+. gen flag = sn==2 & section==1 // the second section logically cannot be "start"
+
+. tab flag
+
+       flag |      Freq.     Percent        Cum.
+------------+-----------------------------------
+          0 |      7,512       99.76       99.76
+          1 |         18        0.24      100.00
+------------+-----------------------------------
+      Total |      7,530      100.00
+
+. drop if sn==1 & section==1 // drop all "start" activities; assume start before first section is open.
+(1,638 observations deleted)
+
+. drop if sn==2 & section==1 // drop if second section is "start", logical fallacy
+(18 observations deleted)
+
+. drop sn flag
+
+. 
+. * Reshaping wide
+. bysort code resume: gen section_n = _n
+
+. sum section_n // check the max
+
+    Variable |        Obs        Mean    Std. Dev.       Min        Max
+-------------+---------------------------------------------------------
+   section_n |      5,874     3.42935    2.699464          1         26
+
+. reshape wide section section_start, i(code resume) j(section_n)
+(note: j = 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26)
+
+Data                               long   ->   wide
+-----------------------------------------------------------------------------
+Number of obs.                     5874   ->    1340
+Number of variables                   5   ->      54
+j variable (26 values)        section_n   ->   (dropped)
+xij variables:
+                                section   ->   section1 section2 ... section26
+                          section_start   ->   section_start1 section_start2 ... section_start26
+-----------------------------------------------------------------------------
+
+. 
+. tab section1 // no "start" section1
+
+     1 section |      Freq.     Percent        Cum.
+---------------+-----------------------------------
+Education Open |      1,271       94.85       94.85
+     Work Open |         52        3.88       98.73
+     Misc Open |         17        1.27      100.00
+---------------+-----------------------------------
+         Total |      1,340      100.00
+
+. 
+. * Saving file
+. save "$data/study2_activity_section_status_wide.dta", replace
+file /Users/clairedaviss/Library/CloudStorage/GoogleDrive-cedaviss@gmail.com/.shortcut-targets-by-id/1rPhM1nXscu6uP-oHimucPUcyQ05iBPNL/study1/SMR Study 2 Replication Pac
+> kage/data/study2_activity_section_status_wide.dta saved
+
+. restore
+
+.         
+.         
+. * Creating subset of full dataset, with just end status ------------------------
+. 
+. * Subsetting data
+. preserve
+
+. keep code resume endbutton_* activities acts_* 
+
+. duplicates drop
+
+Duplicates in terms of all variables
+
+(10,561 observations deleted)
+
+. sum activities
+
+    Variable |        Obs        Mean    Std. Dev.       Min        Max
+-------------+---------------------------------------------------------
+  activities |      1,655    7.381269    5.011379          1         54
+
+. save "$data/study2_activity_end_buttons.dta", replace
+file /Users/clairedaviss/Library/CloudStorage/GoogleDrive-cedaviss@gmail.com/.shortcut-targets-by-id/1rPhM1nXscu6uP-oHimucPUcyQ05iBPNL/study1/SMR Study 2 Replication Pac
+> kage/data/study2_activity_end_buttons.dta saved
+
+. restore
+
+. 
+. 
+. * Creating subset of full dataset, with just resume-level variables ------------
+. 
+. * Keeping only resume-level variables (same within resume)
+. keep code resume endbutton_* activities acts_* ever_* tottime totminutes ///
+>         total_up total_circle total_down starttime edutime worktime misctime
+
+. duplicates drop
+
+Duplicates in terms of all variables
+
+(10,561 observations deleted)
+
+. 
+. * Renaming "resume" to match "candidate" variable name
+. rename resume candidate
+
+.         /* Note: this is necessary for this data to eventually be merged with the
+>         data file developed in 03_data_cleanQualtricsData.do. */
+. 
+. * Saving file
+. save "$data/study2_activity_long.dta", replace
+file /Users/clairedaviss/Library/CloudStorage/GoogleDrive-cedaviss@gmail.com/.shortcut-targets-by-id/1rPhM1nXscu6uP-oHimucPUcyQ05iBPNL/study1/SMR Study 2 Replication Pac
+> kage/data/study2_activity_long.dta saved
+
+. 
+. 
+. * Log close --------------------------------------------------------------------
+. 
+. log close
+      name:  <unnamed>
+       log:  /Users/clairedaviss/Library/CloudStorage/GoogleDrive-cedaviss@gmail.com/.shortcut-targets-by-id/1rPhM1nXscu6uP-oHimucPUcyQ05iBPNL/study1/SMR Study 2 Replica
+> tion Package/do/log/01_clean_activity_data_2024-06-15.log
+  log type:  text
+ closed on:  15 Jun 2024, 17:44:29
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------
